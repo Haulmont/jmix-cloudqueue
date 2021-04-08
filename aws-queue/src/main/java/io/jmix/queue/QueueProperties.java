@@ -3,7 +3,7 @@ package io.jmix.queue;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-@ConfigurationProperties(prefix = "jmix.cloud")
+@ConfigurationProperties(prefix = "jmix.awsqueue")
 @ConstructorBinding
 public class QueueProperties {
 
