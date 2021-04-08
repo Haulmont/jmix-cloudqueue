@@ -1,6 +1,6 @@
-# Jmix Queue
+# Jmix AWS Queue
 
-This repository contains Cloud Queue project of the [Jmix](https://jmix.io) framework.
+This repository contains AWS Queue project of the [Jmix](https://jmix.io) framework.
 
 For more information see:
 
@@ -13,5 +13,5 @@ For more information see:
 Add to your project's `build.gradle` dependencies:
 
 ```groovy
-implementation 'io.jmix.queue:jmix-queue-starter'
+implementation 'io.jmix.queue:jmix-aws-queue-starter'
 ```

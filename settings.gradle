@@ -1,4 +1,4 @@
-rootProject.name = 'jmix-queue'
+rootProject.name = 'jmix-aws-queue'
 
 
 
@@ -7,5 +7,5 @@ rootProject.children.each { p1 ->
 }
 
 
-include 'queue'
-include 'queue-starter'
+include 'aws-queue'
+include 'aws-queue-starter'

@@ -1,5 +1,5 @@
-group = 'io.jmix.queue'
-archivesBaseName = 'jmix-queue'
+group = 'io.jmix.aws-queue'
+archivesBaseName = 'jmix-aws-queue'
 
 dependencies {
     api platform("io.jmix.bom:jmix-bom:$bomVersion")

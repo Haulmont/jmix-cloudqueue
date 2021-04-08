@@ -1,9 +1,9 @@
-group = 'io.jmix.queue'
-archivesBaseName = 'jmix-queue-starter'
+group = 'io.jmix.aws-queue'
+archivesBaseName = 'jmix-aws-queue-starter'
 
 dependencies {
     api platform("io.jmix.bom:jmix-bom:$bomVersion")
-    api project(':queue')
+    api project(':aws-queue')
 
     api 'org.springframework:spring-tx'
     api 'org.eclipse.persistence:org.eclipse.persistence.core'
