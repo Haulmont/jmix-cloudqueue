@@ -1,0 +1,28 @@
+group = 'io.jmix.awsqueue'
+archivesBaseName = 'jmix-awsqueue-starter'
+
+dependencies {
+    api platform("io.jmix.bom:jmix-bom:$bomVersion")
+    api project(':awsqueue')
+
+    api 'org.springframework:spring-tx'
+    api 'com.thoughtworks.xstream:xstream'
+
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    api 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
+    implementation 'org.codehaus.groovy:groovy-templates'
+    testImplementation 'io.jmix.ui:jmix-ui-test-assist'
+
+    testImplementation 'org.apache.commons:commons-dbcp2'
+    testImplementation 'org.springframework:spring-orm'
+    testImplementation 'ch.qos.logback:logback-classic'
+
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+    testRuntimeOnly 'org.slf4j:slf4j-simple'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.hsqldb:hsqldb'
+}
