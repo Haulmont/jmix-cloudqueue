@@ -3,7 +3,9 @@ package io.jmix.queue;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
+import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
+import com.amazonaws.services.sqs.AmazonSQSClient;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +37,11 @@ public class QueueConfiguration {
     @Bean
     @Primary
     @ConditionalOnMissingBean(name = "amazonSQSAsync")
-    public AmazonSQSAsync amazonSQSAsync() {
+    public AmazonSQSAsyncClient amazonSQSAsync() {
         BasicAWSCredentials basicAWSCredentials =
                 new BasicAWSCredentials(queueProperties.getAccessKey(), queueProperties.getSecretKey());
 
-        return AmazonSQSAsyncClientBuilder
+        return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder
                 .standard()
                 .withRegion(queueProperties.getRegion())
                 .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))

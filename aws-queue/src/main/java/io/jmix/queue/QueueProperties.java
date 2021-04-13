@@ -1,5 +1,6 @@
 package io.jmix.queue;
 
+import io.micrometer.core.lang.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
@@ -11,10 +12,14 @@ public class QueueProperties {
     protected String secretKey;
     protected String region;
 
-    public QueueProperties(String accessKey, String secretKey, String region) {
+    protected String queueFamilyTag;
+
+    public QueueProperties(String accessKey, String secretKey, String region,
+                           @Nullable String queueFamilyTag) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.region = region;
+        this.queueFamilyTag = queueFamilyTag;
     }
 
     public String getAccessKey() {
@@ -39,5 +44,13 @@ public class QueueProperties {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public String getQueueFamilyTag() {
+        return queueFamilyTag;
+    }
+
+    public void setQueueFamilyTag(String queueFamilyTag) {
+        this.queueFamilyTag = queueFamilyTag;
     }
 }
