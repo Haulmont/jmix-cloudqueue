@@ -16,11 +16,19 @@
 
 package io.jmix.autoconfigure.awsqueue;
 
-import io.jmix.awsqueue.QueueUiConfiguration;
+import io.jmix.awsqueueui.QueueConfiguration;
+import io.jmix.awsqueueui.QueueUiConfiguration;
+import io.jmix.core.CoreConfiguration;
+import io.jmix.uiexport.UiExportConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({QueueUiConfiguration.class})
+@Import({
+        CoreConfiguration.class,
+        QueueConfiguration.class,
+        QueueUiConfiguration.class,
+        UiExportConfiguration.class
+})
 public class QueueUiAutoConfiguration {
 }

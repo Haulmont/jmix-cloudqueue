@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.entity;
+package io.jmix.awsqueueui.entity;
 
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
@@ -97,7 +97,7 @@ public class QueueInfo {
 
     @JmixProperty
     public String getStatusName() {
-        return status == null ? null : QueueStatus.fromId(status).name();
+        return status == null ? "-" : QueueStatus.fromId(status).name();
     }
 
     public void setStatus(QueueStatus status) {

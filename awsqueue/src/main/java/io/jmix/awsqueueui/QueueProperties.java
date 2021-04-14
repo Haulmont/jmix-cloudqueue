@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.awsqueueui;
 
 import io.micrometer.core.lang.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;

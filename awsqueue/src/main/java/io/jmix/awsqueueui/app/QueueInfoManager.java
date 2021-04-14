@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.app;
+package io.jmix.awsqueueui.app;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.*;
 import io.jmix.core.DataManager;
-import io.jmix.awsqueue.QueueProperties;
-import io.jmix.awsqueue.entity.QueueInfo;
-import io.jmix.awsqueue.entity.QueueStatus;
-import io.jmix.awsqueue.entity.QueueType;
+import io.jmix.awsqueueui.QueueProperties;
+import io.jmix.awsqueueui.entity.QueueInfo;
+import io.jmix.awsqueueui.entity.QueueStatus;
+import io.jmix.awsqueueui.entity.QueueType;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -187,7 +187,7 @@ public class QueueInfoManager {
 
     protected String getLocalTime(String timestampStr) {
         //todo use Client's local time
-        long seconds = Long.valueOf(timestampStr).longValue();
+        long seconds = Long.parseLong(timestampStr);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss z");
         Calendar calendar = Calendar.getInstance();

@@ -24,7 +24,12 @@ dependencies {
 
     api 'io.jmix.core:jmix-core'
     api 'io.jmix.ui:jmix-ui'
-
+    api 'io.jmix.ui:jmix-ui-data'
+    api 'io.jmix.ui:jmix-ui-export'
+    api 'io.jmix.security:jmix-security'
+    api 'io.jmix.security:jmix-security-ui'
+    api 'org.springframework:spring-tx'
+    api 'com.thoughtworks.xstream:xstream'
 
     api 'org.springframework.boot:spring-boot-autoconfigure'
     api 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'

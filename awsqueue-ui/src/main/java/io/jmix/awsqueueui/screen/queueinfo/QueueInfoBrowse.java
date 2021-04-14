@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.screen.queueinfo;
+package io.jmix.awsqueueui.screen.queueinfo;
 
-import io.jmix.awsqueue.app.QueueInfoManager;
-import io.jmix.awsqueue.app.QueueStatusCache;
-import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.awsqueueui.app.QueueInfoManager;
+import io.jmix.awsqueueui.app.QueueStatusCache;
+import io.jmix.awsqueueui.entity.QueueInfo;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;

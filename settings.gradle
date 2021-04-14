@@ -16,12 +16,12 @@
 
 rootProject.name = 'jmix-awsqueue'
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
-}
-
 include 'awsqueue'
 include 'awsqueue-starter'
 include 'awsqueue-ui'
 include 'awsqueue-ui-starter'
+
+rootProject.children.each { p1 ->
+    p1.buildFileName = "${p1.name}.gradle"
+}
 
