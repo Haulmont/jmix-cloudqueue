@@ -16,8 +16,11 @@
 
 package io.jmix.awsqueue;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.jmix.core.CoreConfiguration;
@@ -52,14 +55,19 @@ public class QueueConfiguration {
     @Primary
     @ConditionalOnMissingBean(name = "amazonSQSAsync")
     public AmazonSQSAsyncClient amazonSQSAsync() {
-        BasicAWSCredentials basicAWSCredentials =
-                new BasicAWSCredentials(queueProperties.getAccessKey(), queueProperties.getSecretKey());
+        if (queueProperties.getAccessKey() != null && queueProperties.getSecretKey() != null) {
+            return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder
+                    .standard()
+                    .withRegion(queueProperties.getRegion())
+                    .withCredentials(new AWSStaticCredentialsProvider(getBasicAwsCredentials()))
+                    .build();
+        } else {
+            return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder.defaultClient();
+        }
+    }
 
-        return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder
-                .standard()
-                .withRegion(queueProperties.getRegion())
-                .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials))
-                .build();
+    protected AWSCredentials getBasicAwsCredentials(){
+        return new BasicAWSCredentials(queueProperties.getAccessKey(), queueProperties.getSecretKey());
     }
 
 }

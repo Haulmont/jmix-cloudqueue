@@ -16,6 +16,7 @@
 
 package io.jmix.awsqueue;
 
+import com.amazonaws.regions.Regions;
 import io.micrometer.core.lang.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
@@ -30,11 +31,14 @@ public class QueueProperties {
 
     protected String queueFamilyTag;
 
-    public QueueProperties(String accessKey, String secretKey, String region,
+    public QueueProperties(String accessKey,
+                           String secretKey,
+                           @Nullable String region,
                            @Nullable String queueFamilyTag) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
-        this.region = region;
+        this.region = region != null ? region : Regions.DEFAULT_REGION.getName();
+
         this.queueFamilyTag = queueFamilyTag;
     }
 

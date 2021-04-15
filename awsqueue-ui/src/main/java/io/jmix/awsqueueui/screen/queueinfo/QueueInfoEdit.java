@@ -23,7 +23,8 @@ import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@UiController("QueueInfo.edit")
+@PrimaryEditorScreen(QueueInfo.class)
+@UiController("awsqueue_QueueInfo.edit")
 @UiDescriptor("queue-info-edit.xml")
 @EditedEntityContainer("queueInfoDc")
 public class QueueInfoEdit extends StandardEditor<QueueInfo> {

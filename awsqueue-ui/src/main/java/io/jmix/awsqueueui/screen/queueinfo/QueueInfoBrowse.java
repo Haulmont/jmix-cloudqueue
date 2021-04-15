@@ -24,13 +24,13 @@ import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
-import io.jmix.ui.screen.*;
 import io.jmix.ui.screen.LookupComponent;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@UiController("QueueInfo.browse")
+@UiController("awsqueue_QueueInfo.browse")
 @UiDescriptor("queue-info-browse.xml")
 @LookupComponent("queueInfoDataGrid")
 public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
@@ -103,7 +103,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
     @SuppressWarnings("DuplicatedCode")
     protected Component getContent(QueueInfo queueInfo) {
         String lastUpdatedStr = "-";
-        if(queueInfo.getLastUpdateDateTime() != null){
+        if (queueInfo.getLastUpdateDateTime() != null) {
             lastUpdatedStr = queueInfo.getLastUpdateDateTime().toString();
         }
 
@@ -177,5 +177,4 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
         closeButton.setAction(closeAction);
         return closeButton;
     }
-
 }
