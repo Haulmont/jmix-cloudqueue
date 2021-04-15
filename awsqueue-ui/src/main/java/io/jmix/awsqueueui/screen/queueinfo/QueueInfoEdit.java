@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.screen.queueinfo;
+package io.jmix.awsqueueui.screen.queueinfo;
 
 import io.jmix.awsqueue.app.QueueInfoManager;
 import io.jmix.awsqueue.entity.QueueInfo;
@@ -22,8 +22,6 @@ import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.concurrent.ExecutionException;
 
 @UiController("QueueInfo.edit")
 @UiDescriptor("queue-info-edit.xml")

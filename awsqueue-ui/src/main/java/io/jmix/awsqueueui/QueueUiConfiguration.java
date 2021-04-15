@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.awsqueueui;
 
+import io.jmix.awsqueue.QueueConfiguration;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;
 import io.jmix.core.impl.scanning.AnnotationScanMetadataReaderFactory;
@@ -38,7 +39,7 @@ import java.util.Collections;
         QueueConfiguration.class,
         UiConfiguration.class,
 })
-@PropertySource(name = "io.jmix.awsqueue", value = "classpath:/io/jmix/awsqueue/module.properties")
+@PropertySource(name = "io.jmix.awsqueue", value = "classpath:/io/jmix/awsqueueui/module.properties")
 public class QueueUiConfiguration {
 
     @Bean("QueueUiControllers")
@@ -46,7 +47,7 @@ public class QueueUiConfiguration {
                                               AnnotationScanMetadataReaderFactory metadataReaderFactory) {
         UiControllersConfiguration uiControllers
                 = new UiControllersConfiguration(applicationContext, metadataReaderFactory);
-        uiControllers.setBasePackages(Collections.singletonList("io.jmix.awsqueue.screen"));
+        uiControllers.setBasePackages(Collections.singletonList("io.jmix.awsqueueui.screen"));
         return uiControllers;
     }
 }

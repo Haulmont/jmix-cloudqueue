@@ -16,7 +16,7 @@
   -->
 
 <menu-config xmlns="http://jmix.io/schema/ui/menu">
-    <menu id="queues" caption="msg://menu.awsqueue">
-        <item id="QueueInfo.browse" caption="msg://menu.QueueInfo.browse"/>
+    <menu id="queues" caption="msg://io.jmix.awsqueueui/menu.awsqueue" insertAfter="administration">
+        <item id="QueueInfo.browse" caption="msg://io.jmix.awsqueueui.screen.queueinfo/queueInfoBrowse.caption"/>
     </menu>
 </menu-config>
