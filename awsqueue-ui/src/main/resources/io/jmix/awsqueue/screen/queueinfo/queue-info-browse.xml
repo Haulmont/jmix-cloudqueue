@@ -50,7 +50,7 @@
             <columns>
                 <column property="name"/>
                 <column property="type"/>
-                <column property="created"/>
+                <column property="createdDateTime"/>
                 <column property="messagesAvailable"/>
                 <column property="messagesInFlight"/>
                 <column property="statusName"/>

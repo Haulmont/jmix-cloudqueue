@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueueui.screen.queueinfo;
+package io.jmix.awsqueue.screen.queueinfo;
 
-import io.jmix.awsqueueui.app.QueueInfoManager;
-import io.jmix.awsqueueui.app.QueueStatusCache;
-import io.jmix.awsqueueui.entity.QueueInfo;
+import io.jmix.awsqueue.app.QueueInfoManager;
+import io.jmix.awsqueue.app.QueueStatusCache;
+import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;
@@ -26,8 +26,6 @@ import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.screen.LookupComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -36,8 +34,6 @@ import java.util.List;
 @UiDescriptor("queue-info-browse.xml")
 @LookupComponent("queueInfoDataGrid")
 public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
-
-    private static final Logger log = LoggerFactory.getLogger(QueueInfoBrowse.class);
 
     @Autowired
     private CollectionContainer<QueueInfo> queueInfoDc;
@@ -106,6 +102,11 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
 
     @SuppressWarnings("DuplicatedCode")
     protected Component getContent(QueueInfo queueInfo) {
+        String lastUpdatedStr = "-";
+        if(queueInfo.getLastUpdateDateTime() != null){
+            lastUpdatedStr = queueInfo.getLastUpdateDateTime().toString();
+        }
+
         Label<String> content = uiComponents.create(Label.TYPE_STRING);
         content.setHtmlEnabled(true);
         content.setId("contentLabel");
@@ -120,7 +121,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
         sb.append("<tr>");
         sb.append("<td>").append(queueInfo.getCreated()).append("</td>");
         sb.append("<td>").append(queueInfo.getMaximumMessageSize()).append(" KB ").append("</td>");
-        sb.append("<td>").append(queueInfo.getLastUpdate()).append("</td>");
+        sb.append("<td>").append(lastUpdatedStr).append("</td>");
         sb.append("</tr>").append("</table>");
 
         sb.append("<table spacing=3px padding=3px>")

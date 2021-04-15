@@ -16,8 +16,8 @@
 
 package io.jmix.autoconfigure.awsqueue;
 
-import io.jmix.awsqueueui.QueueConfiguration;
-import io.jmix.awsqueueui.QueueUiConfiguration;
+import io.jmix.awsqueue.QueueConfiguration;
+import io.jmix.awsqueue.QueueUiConfiguration;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.uiexport.UiExportConfiguration;
 import org.springframework.context.annotation.Configuration;

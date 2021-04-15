@@ -14,66 +14,133 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueueui.entity;
+package io.jmix.awsqueue.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.micrometer.core.lang.Nullable;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JmixEntity
 public class QueueInfo {
+
+    @JsonIgnore
     @JmixGeneratedValue
     @JmixProperty(mandatory = true)
     @JmixId
     private UUID id;
 
+    @JsonIgnore
     @InstanceName
     @JmixProperty(mandatory = true)
     private String name;
 
+    @JsonIgnore
     @JmixProperty(mandatory = true)
     private String url;
 
+    @JsonIgnore
     @JmixProperty(mandatory = true)
     private Integer type;
 
+    @JsonIgnore
     private Integer status;
 
-    private String created = "-";
+    @JsonProperty("CreatedTimestamp")
+    private Long created;
 
-    private String lastUpdate = "-";
+    @JsonProperty("LastModifiedTimestamp")
+    private Long lastUpdate;
 
-    private Long messagesAvailable = 0L;
+    @JsonProperty("MaximumMessageSize")
+    @Max(message = "Should be between 1 KB and 256 KB.", value = 262144)
+    @Min(message = "Should be between 1 KB and 256 KB.", value = 1024)
+    private Long maximumMessageSize;
 
-    private Long messageDelayed = 0L;
-
-    private Long messagesInFlight = 0L;
-
-    @Max(message = "Should be between 0 seconds and 12 hours.", value = 43200)
-    @Min(message = "Should be between 0 seconds and 12 hours.", value = 0)
-    private Long visibilityTimeout;
-
+    @JsonProperty("MessageRetentionPeriod")
     @Max(message = "Should be between 1 minute and 14 days.", value = 1209600)
     @Min(message = "Should be between 1 minute and 14 days.", value = 60)
     private Long messageRetentionPeriod;
 
+    @JsonProperty("VisibilityTimeout")
+    @Max(message = "Should be between 0 seconds and 12 hours.", value = 43200)
+    @Min(message = "Should be between 0 seconds and 12 hours.", value = 0)
+    private Long visibilityTimeout;
+
+    @JsonProperty("ApproximateNumberOfMessages")
+    private Long messagesAvailable;
+
+    @JsonProperty("DelaySeconds")
     @Max(message = "Should be between 0 seconds and 15 minutes.", value = 900)
     @Min(message = "Should be between 0 seconds and 15 minutes.", value = 0)
     private Long deliveryTime;
 
-    @Max(message = "Should be between 1 KB and 256 KB.", value = 256)
-    @Min(message = "Should be between 1 KB and 256 KB.", value = 1)
-    private Long maximumMessageSize;
+    @JsonProperty("ApproximateNumberOfMessagesNotVisible")
+    private Long messagesInFlight;
 
+    @JsonProperty("ReceiveMessageWaitTimeSeconds")
     @Max(message = "Should be between 0 and 20 seconds.", value = 20)
     @Min(message = "Should be between 0 and 20 seconds.", value = 0)
     private Long receiveMessageWaitTime;
+
+    @JsonProperty("ApproximateNumberOfMessagesDelayed")
+    private Long messageDelayed;
+
+    @JsonIgnore
+    @JmixProperty
+    public String getStatusName() {
+        return status == null ? "-" : QueueStatus.fromId(status).name();
+    }
+
+    @JsonIgnore
+    @Nullable
+    @JmixProperty
+    public LocalDateTime getCreatedDateTime() {
+        if (created == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(created * 1000), ZoneId.systemDefault());
+    }
+
+    @JsonIgnore
+    @Nullable
+    @JmixProperty
+    public LocalDateTime getLastUpdateDateTime() {
+        if (lastUpdate == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(lastUpdate * 1000), ZoneId.systemDefault());
+    }
+
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setLastUpdate(Long lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public Long getLastUpdate() {
+        return lastUpdate;
+    }
 
     public Long getMessageDelayed() {
         return messageDelayed;
@@ -83,21 +150,8 @@ public class QueueInfo {
         this.messageDelayed = messageDelayed;
     }
 
-    public String getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(String lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
     public QueueStatus getStatus() {
         return status == null ? null : QueueStatus.fromId(status);
-    }
-
-    @JmixProperty
-    public String getStatusName() {
-        return status == null ? "-" : QueueStatus.fromId(status).name();
     }
 
     public void setStatus(QueueStatus status) {
@@ -151,14 +205,6 @@ public class QueueInfo {
 
     public void setVisibilityTimeout(Long visibilityTimeout) {
         this.visibilityTimeout = visibilityTimeout;
-    }
-
-    public void setCreated(String created) {
-        this.created = created;
-    }
-
-    public String getCreated() {
-        return created;
     }
 
     public Long getMessagesInFlight() {

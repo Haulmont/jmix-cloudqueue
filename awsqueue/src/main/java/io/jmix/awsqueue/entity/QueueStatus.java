@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueueui.entity;
+package io.jmix.awsqueue.entity;
 
 import io.jmix.core.metamodel.datatype.impl.EnumClass;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueueui;
+package io.jmix.awsqueue;
 
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;

@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueueui.app;
+package io.jmix.awsqueue.app;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jmix.awsqueue.QueueProperties;
+import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.awsqueue.entity.QueueStatus;
+import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.DataManager;
-import io.jmix.awsqueueui.QueueProperties;
-import io.jmix.awsqueueui.entity.QueueInfo;
-import io.jmix.awsqueueui.entity.QueueStatus;
-import io.jmix.awsqueueui.entity.QueueType;
+import io.jmix.core.Metadata;
+import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,8 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,18 +45,22 @@ import java.util.stream.Collectors;
 public class QueueInfoManager {
     private static final Logger log = LoggerFactory.getLogger(QueueInfoManager.class);
     private static final String APPLICATION_TAG_KEY = "ApplicationTag";
+
     @Autowired
     protected AmazonSQSAsyncClient amazonSQSAsyncClient;
-
     @Autowired
-    private DataManager dataManager;
-
+    protected QueueStatusCache queueStatusCache;
     @Autowired
-    private QueueStatusCache queueStatusCache;
-
-
+    protected QueueProperties queueProperties;
     @Autowired
-    private QueueProperties queueProperties;
+    protected GeneratedIdEntityInitializer generatedIdEntityInitializer;
+
+    protected ObjectMapper mapper;
+
+    @PostConstruct
+    protected void init() {
+        mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     public List<QueueInfo> loadFromApi() {
         return amazonSQSAsyncClient
@@ -66,6 +73,19 @@ public class QueueInfoManager {
                 .collect(Collectors.toList());
     }
 
+    protected boolean isInternalExistingQueue(String queueUrl) {
+        if (prefixExists()) {
+            try {
+                ListQueueTagsResult result = amazonSQSAsyncClient.listQueueTags(queueUrl);
+                return result.getTags().containsKey(APPLICATION_TAG_KEY) &&
+                        result.getTags().get(APPLICATION_TAG_KEY).equals(getApplicationPrefix());
+            } catch (QueueDoesNotExistException exception) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public List<QueueInfo> loadAll() {
         List<QueueInfo> resultQueues = loadFromApi();
         syncCacheWithApi(resultQueues);
@@ -73,19 +93,18 @@ public class QueueInfoManager {
         return resultQueues;
     }
 
-    protected void syncCacheWithApi(List<QueueInfo> apiQueues){
+    protected void syncCacheWithApi(List<QueueInfo> apiQueues) {
         for (String queueName : queueStatusCache.getPendingNames()) {
-            if(apiQueues.stream()
-                    .anyMatch(t -> t.getName().equals(queueName))){
+            if (apiQueues.stream()
+                    .anyMatch(t -> t.getName().equals(queueName))) {
                 QueueInfo queueInfo = queueStatusCache.getPendingQueue(queueName);
-                if(queueInfo.getStatus().equals(QueueStatus.ON_CREATE)){
+                if (queueInfo.getStatus().equals(QueueStatus.ON_CREATE)) {
                     queueStatusCache.removeFromCache(queueName);
                 }
-            }
-            else if(apiQueues.stream()
-                    .noneMatch(t -> t.getName().equals(queueName))){
+            } else if (apiQueues.stream()
+                    .noneMatch(t -> t.getName().equals(queueName))) {
                 QueueInfo queueInfo = queueStatusCache.getPendingQueue(queueName);
-                if(queueInfo.getStatus().equals(QueueStatus.ON_DELETE)){
+                if (queueInfo.getStatus().equals(QueueStatus.ON_DELETE)) {
                     queueStatusCache.removeFromCache(queueName);
                 }
             }
@@ -110,46 +129,40 @@ public class QueueInfoManager {
         GetQueueAttributesResult attributesResult;
         try {
             attributesResult = amazonSQSAsyncClient.getQueueAttributes(request);
-        } catch (QueueDoesNotExistException exception){
+        } catch (QueueDoesNotExistException exception) {
             return null;
         }
-
-        QueueInfo queueInfo = dataManager.create(QueueInfo.class);
         Map<String, String> attr = attributesResult.getAttributes();
+        QueueInfo queueInfo = initQueueInfoFromAttributes(attr);
 
-        String[] arn = attr.get("QueueArn").split(":");
-        String name = arn[arn.length - 1];
         queueInfo.setUrl(queueUrl);
-        queueInfo.setName(name);
-        queueInfo.setType(getTypeByName(name));
+        queueInfo.setName(getNameFromAttributes(attr));
+        queueInfo.setType(getTypeByName(attr));
         setStatusFromCache(queueInfo);
-        queueInfo.setCreated(getLocalTime(attr.get("CreatedTimestamp")));
-        queueInfo.setLastUpdate(getLocalTime(attr.get("LastModifiedTimestamp")));
-        queueInfo.setMaximumMessageSize(getSizeFromStr(attr.get("MaximumMessageSize")));
-        queueInfo.setMessageRetentionPeriod(getSizeFromStr(attr.get("MessageRetentionPeriod")));
-        queueInfo.setVisibilityTimeout(getSizeFromStr(attr.get("VisibilityTimeout")));
-        queueInfo.setMessagesAvailable(getSizeFromStr(attr.get("ApproximateNumberOfMessages")));
-        queueInfo.setDeliveryTime(getSizeFromStr(attr.get("DelaySeconds")));
-        queueInfo.setMessagesInFlight(getSizeFromStr(attr.get("ApproximateNumberOfMessagesNotVisible")));
-        queueInfo.setReceiveMessageWaitTime(getSizeFromStr(attr.get("ReceiveMessageWaitTimeSeconds")));
-        queueInfo.setMessageDelayed(getSizeFromStr(attr.get("ApproximateNumberOfMessagesDelayed")));
+
         return queueInfo;
     }
 
-    protected boolean isInternalExistingQueue(String queueUrl){
-        if(prefixExists()){
-            try {
-                ListQueueTagsResult result = amazonSQSAsyncClient.listQueueTags(queueUrl);
-                return result.getTags().containsKey(APPLICATION_TAG_KEY) &&
-                        result.getTags().get(APPLICATION_TAG_KEY).equals(getApplicationPrefix());
-            } catch (QueueDoesNotExistException exception){
-                return false;
-            }
-        }
-        return true;
+    private QueueInfo initQueueInfoFromAttributes(Map<String, String> attr) {
+        QueueInfo queueInfo = mapper.convertValue(attr, QueueInfo.class);
+        generatedIdEntityInitializer.initEntity(queueInfo);
+        return queueInfo;
     }
 
-    protected void setStatusFromCache(QueueInfo queueInfo) {
+    private String getNameFromAttributes(Map<String, String> attr) {
+        String[] arnValues = attr.get("QueueArn").split(":");
+        return arnValues[arnValues.length - 1];
+    }
+
+    private QueueType getTypeByName(Map<String, String> attr) {
+        String name = getNameFromAttributes(attr);
+        if (name.endsWith(".fifo")) {
+            return QueueType.FIFO;
+        }
+        return QueueType.STANDARD;
+    }
+
+    private void setStatusFromCache(QueueInfo queueInfo) {
         if (queueStatusCache.isNotAvailable(queueInfo)) {
             queueInfo.setStatus(queueStatusCache.getPendingStatus(queueInfo));
         } else {
@@ -162,51 +175,38 @@ public class QueueInfoManager {
         queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_DELETE);
     }
 
-    public void createAsync(QueueInfo queueInfo, Map<String, String> attr) {
-        CreateQueueRequest createQueueRequest = new CreateQueueRequest()
-                .withQueueName(queueInfo.getName())
-                .withAttributes(attr);
+    public void createAsync(QueueInfo queueInfo) {
+        Map<String, Object> attr = mapper.convertValue(queueInfo, Map.class);
 
-        if(prefixExists()){
-            Map<String, String> tags = new HashMap<>();
-            tags.put(APPLICATION_TAG_KEY, getApplicationPrefix());
-            createQueueRequest.withTags(tags);
+        CreateQueueRequest createQueueRequest = new CreateQueueRequest()
+                .withQueueName(queueInfo.getName());
+
+        for (Map.Entry<String, Object> kv : attr.entrySet()) {
+            createQueueRequest.addAttributesEntry(kv.getKey(), kv.getValue().toString());
+        }
+
+        if (queueInfo.getType() == QueueType.FIFO) {
+            createQueueRequest.addAttributesEntry("FifoQueue", Boolean.TRUE.toString());
+        }
+        if (prefixExists()) {
+            createQueueRequest.addTagsEntry(APPLICATION_TAG_KEY, getApplicationPrefix());
         }
 
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
         queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_CREATE);
     }
 
-    protected boolean prefixExists(){
+    private void putIfNotBlank(Map<String, String> map, String key, @Nullable String value) {
+        if (StringUtils.isNotBlank(value)) {
+            map.put(key, value);
+        }
+    }
+
+    protected boolean prefixExists() {
         return getApplicationPrefix() != null;
     }
 
-    protected String getApplicationPrefix(){
+    protected String getApplicationPrefix() {
         return queueProperties.getQueueFamilyTag();
-    }
-
-    protected String getLocalTime(String timestampStr) {
-        //todo use Client's local time
-        long seconds = Long.parseLong(timestampStr);
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss z");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(Long.parseLong(String.valueOf(seconds * 1000)));
-
-        return simpleDateFormat.format(calendar.getTime());
-    }
-
-    protected QueueType getTypeByName(String name) {
-        if (name.endsWith(".fifo")) {
-            return QueueType.FIFO;
-        }
-        return QueueType.STANDARD;
-    }
-
-    protected Long getSizeFromStr(String value) {
-        if (StringUtils.isBlank(value)) {
-            return 0L;
-        }
-        return (Long.valueOf(value));
     }
 }
