@@ -16,7 +16,7 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
-import io.jmix.awsqueue.app.QueueInfoManager;
+import io.jmix.awsqueue.QueueManagerImpl;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.ui.component.*;
@@ -34,11 +34,11 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
     @Autowired
     private ComboBox<QueueType> typeField;
     @Autowired
-    private QueueInfoManager queueInfoManager;
+    private QueueManagerImpl queueInfoManager;
 
     @Subscribe("commitAndCloseBtn")
     public void onCommitAndCloseBtnClick(Button.ClickEvent event) {
-        queueInfoManager.createAsync(getEditedEntity());
+        queueInfoManager.createQueue(getEditedEntity());
     }
 
     @Subscribe("typeField")

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.app;
+package io.jmix.awsqueue;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueStatus;
-import io.jmix.awsqueue.QueueProperties;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +38,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component("QueueInfoManager")
-public class QueueInfoManager {
-    private static final Logger log = LoggerFactory.getLogger(QueueInfoManager.class);
-    private static final String APPLICATION_TAG_KEY = "ApplicationTag";
+@Component("awsqueue_QueueManagerImpl")
+public class QueueManagerImpl implements QueueManager {
+    private static final Logger log = LoggerFactory.getLogger(QueueManagerImpl.class);
+    protected static final String APPLICATION_TAG_KEY = "ApplicationTag";
 
     @Autowired
     protected AmazonSQSAsyncClient amazonSQSAsyncClient;
@@ -56,7 +56,10 @@ public class QueueInfoManager {
 
     @PostConstruct
     protected void init() {
-        mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+
     }
 
     public List<QueueInfo> loadFromApi() {
@@ -71,11 +74,13 @@ public class QueueInfoManager {
     }
 
     protected boolean isInternalExistingQueue(String queueUrl) {
-        if (prefixExists()) {
+        String queueFamilyTag = queueProperties.getQueueFamilyTag();
+
+        if (queueFamilyTag != null) {
             try {
                 ListQueueTagsResult result = amazonSQSAsyncClient.listQueueTags(queueUrl);
                 return result.getTags().containsKey(APPLICATION_TAG_KEY) &&
-                        result.getTags().get(APPLICATION_TAG_KEY).equals(getApplicationPrefix());
+                        result.getTags().get(APPLICATION_TAG_KEY).equals(queueFamilyTag);
             } catch (QueueDoesNotExistException exception) {
                 return false;
             }
@@ -167,43 +172,19 @@ public class QueueInfoManager {
         }
     }
 
-    public void deleteAsync(QueueInfo queueInfo) {
+    public void deleteQueue(QueueInfo queueInfo) {
         amazonSQSAsyncClient.deleteQueueAsync(queueInfo.getUrl());
         queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_DELETE);
     }
 
-    public void createAsync(QueueInfo queueInfo) {
-        Map<String, Object> attr = mapper.convertValue(queueInfo, Map.class);
-
-        CreateQueueRequest createQueueRequest = new CreateQueueRequest()
-                .withQueueName(queueInfo.getName());
-
-        for (Map.Entry<String, Object> kv : attr.entrySet()) {
-            createQueueRequest.addAttributesEntry(kv.getKey(), kv.getValue().toString());
-        }
-
-        if (queueInfo.getType() == QueueType.FIFO) {
-            createQueueRequest.addAttributesEntry("FifoQueue", Boolean.TRUE.toString());
-        }
-        if (prefixExists()) {
-            createQueueRequest.addTagsEntry(APPLICATION_TAG_KEY, getApplicationPrefix());
-        }
+    public void createQueue(QueueInfo queueInfo) {
+        CreateQueueRequest createQueueRequest = new CreateQueueRequestBuilder(queueInfo)
+                .withInnerQueueType()
+                .withInnerQueueAttributes()
+                .withPrefixIfNotNull(queueProperties.getQueueFamilyTag())
+                .build();
 
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
         queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_CREATE);
-    }
-
-    private void putIfNotBlank(Map<String, String> map, String key, @Nullable String value) {
-        if (StringUtils.isNotBlank(value)) {
-            map.put(key, value);
-        }
-    }
-
-    protected boolean prefixExists() {
-        return getApplicationPrefix() != null;
-    }
-
-    protected String getApplicationPrefix() {
-        return queueProperties.getQueueFamilyTag();
     }
 }

@@ -16,25 +16,28 @@
 
 package io.jmix.awsqueue.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.jmix.awsqueue.utils.LocalDateTimeDeserializer;
+import io.jmix.awsqueue.utils.LocalDateTimeSerializer;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
+import io.jmix.core.metamodel.annotation.DateTimeFormat;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
-import io.micrometer.core.lang.Nullable;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JmixEntity
+@JmixEntity(annotatedPropertiesOnly = true)
 public class QueueInfo {
 
     @JsonIgnore
@@ -57,88 +60,76 @@ public class QueueInfo {
     private Integer type;
 
     @JsonIgnore
+    @JmixProperty
     private Integer status;
 
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonProperty("CreatedTimestamp")
-    private Long created;
+    @JmixProperty
+    private LocalDateTime created;
 
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonProperty("LastModifiedTimestamp")
-    private Long lastUpdate;
+    @JmixProperty
+    private LocalDateTime lastUpdate;
 
     @JsonProperty("MaximumMessageSize")
-    @Max(message = "Should be between 1 KB and 256 KB.", value = 262144)
-    @Min(message = "Should be between 1 KB and 256 KB.", value = 1024)
+    @Max(message = "{msg://QueueInfo.maximumMessageSize.validation}", value = 262144)
+    @Min(message = "{msg://QueueInfo.maximumMessageSize.validation}", value = 1024)
+    @JmixProperty
     private Long maximumMessageSize;
 
     @JsonProperty("MessageRetentionPeriod")
-    @Max(message = "Should be between 1 minute and 14 days.", value = 1209600)
-    @Min(message = "Should be between 1 minute and 14 days.", value = 60)
+    @Max(message = "{msg://QueueInfo.messageRetentionPeriod.validation}", value = 1209600)
+    @Min(message = "{msg://QueueInfo.messageRetentionPeriod.validation}", value = 60)
+    @JmixProperty
     private Long messageRetentionPeriod;
 
     @JsonProperty("VisibilityTimeout")
-    @Max(message = "Should be between 0 seconds and 12 hours.", value = 43200)
-    @Min(message = "Should be between 0 seconds and 12 hours.", value = 0)
+    @Max(message = "{msg://QueueInfo.visibilityTimeout.validation}", value = 43200)
+    @Min(message = "{msg://QueueInfo.visibilityTimeout.validation}", value = 0)
+    @JmixProperty
     private Long visibilityTimeout;
 
     @JsonProperty("ApproximateNumberOfMessages")
+    @JmixProperty
     private Long messagesAvailable;
 
     @JsonProperty("DelaySeconds")
-    @Max(message = "Should be between 0 seconds and 15 minutes.", value = 900)
-    @Min(message = "Should be between 0 seconds and 15 minutes.", value = 0)
+    @Max(message = "{msg://QueueInfo.deliveryTime.validation}", value = 900)
+    @Min(message = "{msg://QueueInfo.deliveryTime.validation}", value = 0)
+    @JmixProperty
     private Long deliveryTime;
 
     @JsonProperty("ApproximateNumberOfMessagesNotVisible")
+    @JmixProperty
     private Long messagesInFlight;
 
     @JsonProperty("ReceiveMessageWaitTimeSeconds")
-    @Max(message = "Should be between 0 and 20 seconds.", value = 20)
-    @Min(message = "Should be between 0 and 20 seconds.", value = 0)
+    @Max(message = "{msg://QueueInfo.receiveMessageWaitTime.validation}", value = 20)
+    @Min(message = "{msg://QueueInfo.receiveMessageWaitTime.validation}", value = 0)
+    @JmixProperty
     private Long receiveMessageWaitTime;
 
     @JsonProperty("ApproximateNumberOfMessagesDelayed")
+    @JmixProperty
     private Long messageDelayed;
 
-    @JsonIgnore
-    @JmixProperty
-    public String getStatusName() {
-        return status == null ? "-" : QueueStatus.fromId(status).name();
-    }
-
-    @JsonIgnore
-    @Nullable
-    @JmixProperty
-    public LocalDateTime getCreatedDateTime() {
-        if (created == null) {
-            return null;
-        }
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(created * 1000), ZoneId.systemDefault());
-    }
-
-    @JsonIgnore
-    @Nullable
-    @JmixProperty
-    public LocalDateTime getLastUpdateDateTime() {
-        if (lastUpdate == null) {
-            return null;
-        }
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(lastUpdate * 1000), ZoneId.systemDefault());
-    }
-
-
-    public void setCreated(Long created) {
+    public void setCreated(LocalDateTime created) {
         this.created = created;
     }
 
-    public Long getCreated() {
+    public LocalDateTime getCreated() {
         return created;
     }
 
-    public void setLastUpdate(Long lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
-    public Long getLastUpdate() {
+    public LocalDateTime getLastUpdate() {
         return lastUpdate;
     }
 

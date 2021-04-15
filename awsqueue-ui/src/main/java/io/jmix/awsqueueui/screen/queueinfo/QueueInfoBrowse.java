@@ -16,9 +16,10 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
-import io.jmix.awsqueue.app.QueueInfoManager;
-import io.jmix.awsqueue.app.QueueStatusCache;
+import io.jmix.awsqueue.QueueManagerImpl;
+import io.jmix.awsqueue.QueueStatusCache;
 import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.awsqueueui.app.QueueInfoDetailsHtmlGenerator;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;
@@ -38,13 +39,15 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
     @Autowired
     private CollectionContainer<QueueInfo> queueInfoDc;
     @Autowired
-    private QueueInfoManager queueInfoManager;
+    private QueueManagerImpl queueInfoManager;
     @Autowired
     private QueueStatusCache queueStatusCache;
     @Autowired
     private DataGrid<QueueInfo> queueInfoDataGrid;
     @Autowired
     protected UiComponents uiComponents;
+    @Autowired
+    private QueueInfoDetailsHtmlGenerator queueInfoDetailsHtmlGenerator;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -69,7 +72,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
 
     @Subscribe("queueInfoDataGrid.remove")
     public void onQueueStatesTableRemove(Action.ActionPerformedEvent event) {
-        queueInfoManager.deleteAsync(queueInfoDataGrid.getSingleSelected());
+        queueInfoManager.deleteQueue(queueInfoDataGrid.getSingleSelected());
     }
 
     @Install(to = "queueInfoDataGrid", subject = "detailsGenerator")
@@ -100,72 +103,13 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
         return mainLayout;
     }
 
-    @SuppressWarnings("DuplicatedCode")
     protected Component getContent(QueueInfo queueInfo) {
-        String lastUpdatedStr = "-";
-        if (queueInfo.getLastUpdateDateTime() != null) {
-            lastUpdatedStr = queueInfo.getLastUpdateDateTime().toString();
-        }
-
         Label<String> content = uiComponents.create(Label.TYPE_STRING);
         content.setHtmlEnabled(true);
         content.setId("contentLabel");
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("<table spacing=3px padding=3px>")
-                .append("<tr>")
-                .append("<th>Created</th>")
-                .append("<th>MaximumMessageSize</th>")
-                .append("<th>LastUpdated</th>")
-                .append("</tr>");
-        sb.append("<tr>");
-        sb.append("<td>").append(queueInfo.getCreated()).append("</td>");
-        sb.append("<td>").append(queueInfo.getMaximumMessageSize()).append(" KB ").append("</td>");
-        sb.append("<td>").append(lastUpdatedStr).append("</td>");
-        sb.append("</tr>").append("</table>");
-
-        sb.append("<table spacing=3px padding=3px>")
-                .append("<tr>")
-                .append("<th>MessageRetentionPeriod</th>")
-                .append("<th>DefaultVisibilityTimeout</th>")
-                .append("<th>MessagesAvailable</th>")
-                .append("</tr>");
-        sb.append("<tr>");
-        sb.append("<td>").append(queueInfo.getMessageRetentionPeriod()).append(" Days ").append("</td>");
-        sb.append("<td>").append(queueInfo.getVisibilityTimeout()).append(" Seconds ").append("</td>");
-        sb.append("<td>").append(queueInfo.getMessagesAvailable()).append("</td>");
-        sb.append("</tr>").append("</table>");
-
-        sb.append("<table spacing=3px padding=3px>")
-                .append("<tr>")
-                .append("<th>DeliveryDelay</th>")
-                .append("<th>MessagesInFlight</th>")
-                .append("<th>ReceiveMessageWaitTime</th>")
-                .append("</tr>");
-        sb.append("<tr>");
-        sb.append("<td>").append(queueInfo.getDeliveryTime()).append(" Seconds ").append("</td>");
-        sb.append("<td>").append(queueInfo.getMessagesInFlight()).append("</td>");
-        sb.append("<td>").append(queueInfo.getReceiveMessageWaitTime()).append(" Seconds ").append("</td>");
-        sb.append("</tr>").append("</table>");
-
-        sb.append("<table spacing=3px padding=3px>")
-                .append("<tr>")
-                .append("<th>MessagesDelayed</th>")
-                .append("<th>ContentBasedDeduplication</th>")
-                .append("<th>CloudStatus</th>")
-                .append("</tr>");
-        sb.append("<tr>");
-        sb.append("<td>").append(queueInfo.getMessageDelayed()).append("</td>");
-        sb.append("<td>").append("-").append("</td>");
-        sb.append("<td>").append(queueInfo.getStatus().name()).append("</td>");
-        sb.append("</tr>").append("</table>");
-
-
-        content.setValue(sb.toString());
-
+        content.setValue(queueInfoDetailsHtmlGenerator.generateTableHtml(queueInfo));
         return content;
     }
-
 
     protected Component createCloseButton(QueueInfo queueInfo) {
         Button closeButton = uiComponents.create(Button.class);

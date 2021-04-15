@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.app;
+package io.jmix.awsqueue;
 
 import io.jmix.awsqueue.entity.QueueStatus;
 import io.jmix.awsqueue.entity.QueueInfo;
@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component("QueueStatusNavigator")
+@Component("awsqueue_QueueStatusCache")
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class QueueStatusCache {
     protected Map<String, QueueInfo> pendingQueues;

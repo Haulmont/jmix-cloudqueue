@@ -50,10 +50,10 @@
             <columns>
                 <column property="name"/>
                 <column property="type"/>
-                <column property="createdDateTime"/>
+                <column property="created"/>
                 <column property="messagesAvailable"/>
                 <column property="messagesInFlight"/>
-                <column property="statusName"/>
+                <column property="status"/>
             </columns>
             <simplePagination/>
             <buttonsPanel id="buttonsPanel"
