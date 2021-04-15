@@ -13,7 +13,8 @@ For more information see:
 Add to your project's `build.gradle` dependencies:
 
 ```groovy
-implementation 'io.jmix.aws-queue:jmix-aws-queue-starter'
+    implementation 'io.jmix.awsqueue:jmix-awsqueue-starter'
+implementation 'io.jmix.awsqueue:jmix-awsqueue-ui-starter'
 ```
 
 Specify AWS credentials and region in `application.properties`:
