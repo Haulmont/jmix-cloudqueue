@@ -13,7 +13,7 @@ For more information see:
 Add to your project's `build.gradle` dependencies:
 
 ```groovy
-    implementation 'io.jmix.awsqueue:jmix-awsqueue-starter'
+implementation 'io.jmix.awsqueue:jmix-awsqueue-starter'
 implementation 'io.jmix.awsqueue:jmix-awsqueue-ui-starter'
 ```
 
@@ -23,3 +23,11 @@ jmix.awsqueue.region = eu-central-1
 jmix.awsqueue.access-key = AWS_ACCESS_KEY
 jmix.awsqueue.secret-key = AWS_SECRET_KEY
 ```
+By default, tag is not defined and application loads every queue from AWS and
+create queues without any tag
+
+Add AWS family queues tag to use only tagged to restrict queues in your application
+```
+jmix.awsqueue.queue-family-tag = jmixqueues
+```
+After this ADD-on will create and load only 'jmixqueues' tagged queues.
