@@ -16,7 +16,9 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
+import io.jmix.awsqueue.QueueManager;
 import io.jmix.awsqueue.QueueManagerImpl;
+import io.jmix.awsqueue.QueueProperties;
 import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
@@ -24,6 +26,7 @@ import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.Metadata;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PrimaryEditorScreen(QueueInfo.class)
@@ -37,9 +40,11 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
     @Autowired
     private ComboBox<QueueType> typeField;
     @Autowired
-    private QueueManagerImpl queueInfoManager;
+    private QueueManager queueManager;
     @Autowired
     private Metadata metadata;
+    @Autowired
+    private QueueProperties queueProperties;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -52,14 +57,25 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
     @Subscribe("commitAndCloseBtn")
     public void onCommitAndCloseBtnClick(Button.ClickEvent event) {
         QueueInfo queueInfo = getEditedEntity();
+        setNameForPrefix(queueInfo);
         QueueAttributes attributes = queueInfo.getQueueAttributes();
 
-        queueInfoManager.createQueue(new CreateQueueRequestBuilder(queueInfo.getName())
+        queueManager.createQueue(new CreateQueueRequestBuilder(queueInfo.getName())
+                .fromQueueType(queueInfo.getType())
                 .withDeliveryTime(attributes.getDeliveryTime())
                 .withMaximumMessageSize(attributes.getMaximumMessageSize())
                 .withMessageRetentionPeriod(attributes.getMessageRetentionPeriod())
                 .withVisibilityTimeout(attributes.getVisibilityTimeout())
+                .withReceiveMessageWaitTime(attributes.getReceiveMessageWaitTime())
                 .build());
+    }
+
+    protected void setNameForPrefix(QueueInfo queueInfo){
+        String prefix = queueProperties.getQueuePrefix();
+        if (StringUtils.isNotBlank(prefix) && !queueInfo.getName().startsWith(prefix)) {
+            String prefixedName = queueProperties.getQueuePrefix() + "_" + queueInfo.getName();
+            queueInfo.setName(prefixedName);
+        }
     }
 
     @Subscribe("typeField")

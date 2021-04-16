@@ -16,6 +16,7 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
+import io.jmix.awsqueue.QueueManager;
 import io.jmix.awsqueue.QueueManagerImpl;
 import io.jmix.awsqueue.QueueStatusCache;
 import io.jmix.awsqueue.entity.QueueInfo;
@@ -39,7 +40,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
     @Autowired
     private CollectionContainer<QueueInfo> queueInfoDc;
     @Autowired
-    private QueueManagerImpl queueInfoManager;
+    private QueueManager queueManager;
     @Autowired
     private QueueStatusCache queueStatusCache;
     @Autowired
@@ -58,7 +59,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        Collection<QueueInfo> states = queueInfoManager.loadAll();
+        Collection<QueueInfo> states = queueManager.loadAll();
         queueInfoDc.setItems(states);
         getScreenData().loadAll();
     }
@@ -71,7 +72,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
 
     @Subscribe("queueInfoDataGrid.remove")
     public void onQueueStatesTableRemove(Action.ActionPerformedEvent event) {
-        queueInfoManager.deleteQueue(queueInfoDataGrid.getSingleSelected());
+        queueManager.deleteQueue(queueInfoDataGrid.getSingleSelected());
     }
 
     @Install(to = "queueInfoDataGrid", subject = "detailsGenerator")

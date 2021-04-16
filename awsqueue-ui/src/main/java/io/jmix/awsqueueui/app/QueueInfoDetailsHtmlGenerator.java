@@ -6,7 +6,7 @@ import io.jmix.ui.screen.MessageBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("awsqueue_QueueInfoDetailsHtmlGenerator") //todo mb prefix awsqueueui
+@Component("awsqueue_QueueInfoDetailsHtmlGenerator")
 public class QueueInfoDetailsHtmlGenerator {
     @Autowired
     protected Messages messages;

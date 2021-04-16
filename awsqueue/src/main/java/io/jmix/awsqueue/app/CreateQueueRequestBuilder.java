@@ -2,64 +2,53 @@ package io.jmix.awsqueue.app;
 
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import io.jmix.awsqueue.entity.QueueType;
-import io.micrometer.core.lang.Nullable;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CreateQueueRequestBuilder {
-
     protected final CreateQueueRequest createQueueRequest;
-    private final Map<String, String> attributes = new HashMap<>();
+
     public CreateQueueRequestBuilder(String queueName) {
         createQueueRequest = new CreateQueueRequest().withQueueName(queueName);
     }
 
     public CreateQueueRequestBuilder fromQueueType(QueueType queueType) {
         if (queueType == QueueType.FIFO) {
-            attributes.put("FifoQueue", Boolean.TRUE.toString());
+            createQueueRequest.addAttributesEntry("FifoQueue", Boolean.TRUE.toString());
         }
         return this;
     }
 
-    public CreateQueueRequestBuilder withMaximumMessageSize(long maximumMessageSize) {
-        attributes.put("MaximumMessageSize", String.valueOf(maximumMessageSize));
+    public CreateQueueRequestBuilder withMaximumMessageSize(Long maximumMessageSize) {
+        putIfNotNull("MaximumMessageSize", maximumMessageSize);
         return this;
     }
 
-    public CreateQueueRequestBuilder withMessageRetentionPeriod(long messageRetentionPeriod) {
-        attributes.put("MessageRetentionPeriod", String.valueOf(messageRetentionPeriod));
+    public CreateQueueRequestBuilder withMessageRetentionPeriod(Long messageRetentionPeriod) {
+        putIfNotNull("MessageRetentionPeriod", messageRetentionPeriod);
         return this;
     }
 
-    public CreateQueueRequestBuilder withVisibilityTimeout(long visibilityTimeout) {
-        attributes.put("VisibilityTimeout", String.valueOf(visibilityTimeout));
+    public CreateQueueRequestBuilder withVisibilityTimeout(Long visibilityTimeout) {
+        putIfNotNull("VisibilityTimeout", visibilityTimeout);
         return this;
     }
 
-    public CreateQueueRequestBuilder withDeliveryTime(long deliveryTime) {
-        attributes.put("DeliveryTime", String.valueOf(deliveryTime));
+    public CreateQueueRequestBuilder withDeliveryTime(Long deliveryTime) {
+        putIfNotNull("DelaySeconds", deliveryTime);
         return this;
     }
 
-    public CreateQueueRequestBuilder withReceiveMessageWaitTime(long receiveMessageWaitTime) {
-        attributes.put("ReceiveMessageWaitTime", String.valueOf(receiveMessageWaitTime));
+    public CreateQueueRequestBuilder withReceiveMessageWaitTime(Long receiveMessageWaitTime) {
+        putIfNotNull("ReceiveMessageWaitTimeSeconds", receiveMessageWaitTime);
         return this;
     }
 
     public CreateQueueRequest build() {
-        Map<String, String> notNullAttributes = excludeNullFields(attributes);
-        return createQueueRequest.withAttributes(notNullAttributes);
+        return createQueueRequest;
     }
 
-    protected Map<String, String> excludeNullFields(Map<String, String> attributes) {
-        Map<String, String> resultMap = new HashMap<>(attributes);
-        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
-            if (StringUtils.isBlank(entry.getValue())) {
-                attributes.remove(entry.getKey());
-            }
+    private void putIfNotNull(String attrName, Object obj) {
+        if (obj != null) {
+            createQueueRequest.addAttributesEntry(attrName, String.valueOf(obj));
         }
-        return resultMap;
     }
 }

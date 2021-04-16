@@ -55,8 +55,6 @@ public class QueueManagerImpl implements QueueManager {
     protected ObjectMapper mapper;
     @Autowired
     private DataManager dataManager;
-    @Autowired
-    private EntityInitializer entityInitializer;
 
     @PostConstruct
     protected void init() {
@@ -169,7 +167,7 @@ public class QueueManagerImpl implements QueueManager {
     public void createQueue(CreateQueueRequest createQueueRequest) {
         String prefix = queueProperties.getQueuePrefix();
 
-        if (StringUtils.isNotBlank(prefix) && createQueueRequest.getQueueName().startsWith(prefix)) {
+        if (StringUtils.isNotBlank(prefix) && !createQueueRequest.getQueueName().startsWith(prefix)) {
             String prefixedName = queueProperties.getQueuePrefix() + "_" + createQueueRequest.getQueueName();
             createQueueRequest.setQueueName(prefixedName);
         }
@@ -181,7 +179,7 @@ public class QueueManagerImpl implements QueueManager {
     protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest){
         Map<String, String> mapAttrs = createQueueRequest.getAttributes();
         QueueAttributes queueAttributes = mapper.convertValue(mapAttrs, QueueAttributes.class);
-        entityInitializer.initEntity(queueAttributes);
+        generatedIdEntityInitializer.initEntity(queueAttributes);
 
         QueueInfo queueInfo = dataManager.create(QueueInfo.class);
         queueInfo.setName(createQueueRequest.getQueueName());
