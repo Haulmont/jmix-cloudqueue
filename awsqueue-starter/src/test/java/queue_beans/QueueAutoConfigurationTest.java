@@ -16,7 +16,8 @@
 
 package queue_beans;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import io.jmix.autoconfigure.awsqueue.QueueAutoConfiguration;
 import io.jmix.awsqueue.QueueProperties;
 import org.junit.jupiter.api.Test;
@@ -34,35 +35,47 @@ public class QueueAutoConfigurationTest {
                     QueueAutoConfiguration.class,
                     CacheAutoConfiguration.class))
             .withPropertyValues("spring.datasource.url=jdbc:hsqldb:mem:testdb", "spring.datasource.username=sa")
-            .withPropertyValues("jmix.cloud.region=eu-central-1",
-                    "jmix.cloud.access-key=mockAccessKey",
-                    "jmix.cloud.secret-key=mockSecretKey")
+            .withPropertyValues(
+                    "jmix.awsqueue.region=eu-central-1",
+                    "jmix.awsqueue.access-key=mockAccessKey",
+                    "jmix.awsqueue.secret-key=mockSecretKey",
+                    "jmix.awsqueue.queue-prefix=jmixTestPrefix"
+            )
             .withAllowBeanDefinitionOverriding(true);
 
     @Test
-    public void testQueueBeansDefinedOk() {
-        this.contextRunner.run((context) -> {
-            assertThat(context).hasBean("amazonSQSAsync");
-            assertThat(context).getBean("amazonSQSAsync").isInstanceOf(AmazonSQSAsync.class);
-            assertThat(context).getBean("amazonSQSAsync");
+    public void testQueueBeansDefinedByNameOk() {
+        this.contextRunner.run(context -> {
+            final String CLIENT_BEAN_NAME = "amazonSQSAsyncClient";
+            assertThat(context).hasBean(CLIENT_BEAN_NAME);
+            assertThat(context).getBean(CLIENT_BEAN_NAME).isExactlyInstanceOf(AmazonSQSAsyncClient.class);
+            assertThat(context).getBean(CLIENT_BEAN_NAME).isInstanceOf(AmazonSQS.class);
         });
     }
 
     @Test
-    public void testQueueDefined() {
-        this.contextRunner.run((context) -> {
-            assertThat(context).hasBean("queueProperties");
-            assertThat(context).getBean("queueProperties").isInstanceOf(QueueProperties.class);
+    public void testQueueBeansDefinedByClassOk() {
+        this.contextRunner.run(context -> {
+            assertThat(context).getBean(AmazonSQSAsyncClient.class).isExactlyInstanceOf(AmazonSQSAsyncClient.class);
+            assertThat(context).getBeans(AmazonSQS.class).size().isPositive();
+        });
+    }
+
+    @Test
+    public void testQueuePropertiesDefined() {
+        this.contextRunner.run(context -> {
+            assertThat(context).getBean(QueueProperties.class).isExactlyInstanceOf(QueueProperties.class);
         });
     }
 
     @Test
     public void testQueueHasProperties() {
-        this.contextRunner.run((context) -> {
+        this.contextRunner.run(context -> {
             QueueProperties properties = context.getBean(QueueProperties.class);
             assertThat(properties).hasFieldOrPropertyWithValue("accessKey", "mockAccessKey");
             assertThat(properties).hasFieldOrPropertyWithValue("secretKey", "mockSecretKey");
             assertThat(properties).hasFieldOrPropertyWithValue("region", "eu-central-1");
+            assertThat(properties).hasFieldOrPropertyWithValue("queuePrefix", "jmixTestPrefix");
         });
     }
 }

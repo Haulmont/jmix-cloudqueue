@@ -48,13 +48,13 @@ public class QueueConfiguration {
 
     @Bean
     public QueueMessagingTemplate queueMessagingTemplate() {
-        return new QueueMessagingTemplate(amazonSQSAsync());
+        return new QueueMessagingTemplate(amazonSQSAsyncClient());
     }
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(name = "amazonSQSAsync")
-    public AmazonSQSAsyncClient amazonSQSAsync() {
+    @ConditionalOnMissingBean(name = "awsqueue_amazonSQSAsyncClient")
+    public AmazonSQSAsyncClient amazonSQSAsyncClient() {
         if (queueProperties.getAccessKey() != null && queueProperties.getSecretKey() != null) {
             return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder
                     .standard()

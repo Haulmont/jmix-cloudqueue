@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.jmix.awsqueue.entity.QueueAttributes;
-import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;
 import io.micrometer.core.lang.Nullable;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -27,16 +27,6 @@ public class CreateQueueRequestBuilder {
     public CreateQueueRequestBuilder fromQueueType(@Nullable QueueType queueType) {
         if (queueType == QueueType.FIFO) {
             createQueueRequest.addAttributesEntry("FifoQueue", Boolean.TRUE.toString());
-        }
-        return this;
-    }
-
-    public CreateQueueRequestBuilder withPrefixIfNotNull(@Nullable String prefix) {
-        if (prefix != null) {
-            String prevName = createQueueRequest.getQueueName();
-
-            createQueueRequest.setQueueName(prefix + prevName);
-            createQueueRequest.addTagsEntry(APPLICATION_TAG_KEY, prefix);
         }
         return this;
     }

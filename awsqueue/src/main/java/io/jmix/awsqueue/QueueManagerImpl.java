@@ -28,6 +28,7 @@ import io.jmix.awsqueue.entity.QueueStatus;
 import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,29 +65,13 @@ public class QueueManagerImpl implements QueueManager {
 
     public Map<String, QueueInfo> loadFromApi() {
         return amazonSQSAsyncClient
-                .listQueues()
+                .listQueues(queueProperties.getQueuePrefix())
                 .getQueueUrls()
                 .stream()
-                .filter(this::isInternalExistingQueue)
                 .map(this::queueInfoFromUrl)
                 .filter(ObjectUtils::isNotEmpty)
                 .collect(Collectors.toMap(QueueInfo::getName, queueInfo -> queueInfo));
 
-    }
-
-    protected boolean isInternalExistingQueue(String queueUrl) {
-        String queueFamilyTag = queueProperties.getQueuePrefix();
-
-        if (queueFamilyTag != null) {
-            try {
-                ListQueueTagsResult result = amazonSQSAsyncClient.listQueueTags(queueUrl);
-                return result.getTags().containsKey(APPLICATION_TAG_KEY) &&
-                        result.getTags().get(APPLICATION_TAG_KEY).equals(queueFamilyTag);
-            } catch (QueueDoesNotExistException exception) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public Collection<QueueInfo> loadAll() {
@@ -179,10 +164,13 @@ public class QueueManagerImpl implements QueueManager {
     }
 
     public void createQueue(QueueInfo queueInfo) {
+        if(StringUtils.isNotBlank(queueProperties.getQueuePrefix())){
+            queueInfo.setName(queueProperties.getQueuePrefix() + "_" + queueInfo.getName());
+        }
+
         CreateQueueRequest createQueueRequest = new CreateQueueRequestBuilder(queueInfo.getName())
                 .fromQueueType(queueInfo.getType())
                 .withQueueAttributes(queueInfo.getQueueAttributes())
-                .withPrefixIfNotNull(queueProperties.getQueuePrefix())
                 .build();
 
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);

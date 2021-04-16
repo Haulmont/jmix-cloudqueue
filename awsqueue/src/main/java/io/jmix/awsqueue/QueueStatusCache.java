@@ -37,15 +37,15 @@ public class QueueStatusCache {
         pendingQueues = new ConcurrentHashMap<>();
     }
 
-    public Collection<String> getPendingNames(){
+    public Collection<String> getPendingNames() {
         return pendingQueues.keySet();
     }
 
-    public Collection<QueueInfo> getPendingQueues(){
+    public Collection<QueueInfo> getPendingQueues() {
         return pendingQueues.values();
     }
 
-    public void removeFromCache(String name){
+    public void removeFromCache(String name) {
         pendingQueues.remove(name);
     }
 
@@ -69,7 +69,7 @@ public class QueueStatusCache {
         return QueueStatus.RUNNING;
     }
 
-    public QueueInfo getPendingQueue(String name){
+    public QueueInfo getPendingQueue(String name) {
         return pendingQueues.get(name);
     }
 }

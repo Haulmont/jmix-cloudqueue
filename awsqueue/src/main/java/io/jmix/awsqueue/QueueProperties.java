@@ -20,6 +20,7 @@ import com.amazonaws.regions.Regions;
 import io.micrometer.core.lang.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties(prefix = "jmix.awsqueue")
 @ConstructorBinding
@@ -34,7 +35,7 @@ public class QueueProperties {
     public QueueProperties(String accessKey,
                            String secretKey,
                            @Nullable String region,
-                           @Nullable String queuePrefix) {
+                           @DefaultValue("") String queuePrefix) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.region = region != null ? region : Regions.DEFAULT_REGION.getName();
