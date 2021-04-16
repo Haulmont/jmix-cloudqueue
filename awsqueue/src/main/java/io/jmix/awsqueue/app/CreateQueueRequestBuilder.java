@@ -1,46 +1,65 @@
 package io.jmix.awsqueue.app;
 
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueType;
 import io.micrometer.core.lang.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class CreateQueueRequestBuilder {
-    protected static final String APPLICATION_TAG_KEY = "ApplicationTag";
 
-    protected ObjectMapper mapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-    protected CreateQueueRequest createQueueRequest;
-
-
+    protected final CreateQueueRequest createQueueRequest;
+    private final Map<String, String> attributes = new HashMap<>();
     public CreateQueueRequestBuilder(String queueName) {
         createQueueRequest = new CreateQueueRequest().withQueueName(queueName);
     }
 
-    public CreateQueueRequestBuilder fromQueueType(@Nullable QueueType queueType) {
+    public CreateQueueRequestBuilder fromQueueType(QueueType queueType) {
         if (queueType == QueueType.FIFO) {
-            createQueueRequest.addAttributesEntry("FifoQueue", Boolean.TRUE.toString());
+            attributes.put("FifoQueue", Boolean.TRUE.toString());
         }
         return this;
     }
 
-    @SuppressWarnings("unchecked")
-    public CreateQueueRequestBuilder withQueueAttributes(QueueAttributes attributes) {
-        Map<String, Object> attr = mapper.convertValue(attributes, Map.class);
-        for (Map.Entry<String, Object> kv : attr.entrySet()) {
-            createQueueRequest.addAttributesEntry(kv.getKey(), kv.getValue().toString());
-        }
+    public CreateQueueRequestBuilder withMaximumMessageSize(long maximumMessageSize) {
+        attributes.put("MaximumMessageSize", String.valueOf(maximumMessageSize));
+        return this;
+    }
+
+    public CreateQueueRequestBuilder withMessageRetentionPeriod(long messageRetentionPeriod) {
+        attributes.put("MessageRetentionPeriod", String.valueOf(messageRetentionPeriod));
+        return this;
+    }
+
+    public CreateQueueRequestBuilder withVisibilityTimeout(long visibilityTimeout) {
+        attributes.put("VisibilityTimeout", String.valueOf(visibilityTimeout));
+        return this;
+    }
+
+    public CreateQueueRequestBuilder withDeliveryTime(long deliveryTime) {
+        attributes.put("DeliveryTime", String.valueOf(deliveryTime));
+        return this;
+    }
+
+    public CreateQueueRequestBuilder withReceiveMessageWaitTime(long receiveMessageWaitTime) {
+        attributes.put("ReceiveMessageWaitTime", String.valueOf(receiveMessageWaitTime));
         return this;
     }
 
     public CreateQueueRequest build() {
-        return createQueueRequest;
+        Map<String, String> notNullAttributes = excludeNullFields(attributes);
+        return createQueueRequest.withAttributes(notNullAttributes);
+    }
+
+    protected Map<String, String> excludeNullFields(Map<String, String> attributes) {
+        Map<String, String> resultMap = new HashMap<>(attributes);
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+            if (StringUtils.isBlank(entry.getValue())) {
+                attributes.remove(entry.getKey());
+            }
+        }
+        return resultMap;
     }
 }

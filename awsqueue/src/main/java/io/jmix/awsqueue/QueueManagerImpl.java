@@ -26,6 +26,8 @@ import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueStatus;
 import io.jmix.awsqueue.entity.QueueType;
+import io.jmix.core.DataManager;
+import io.jmix.core.EntityInitializer;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,9 +43,6 @@ import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueManagerImpl")
 public class QueueManagerImpl implements QueueManager {
-    private static final Logger log = LoggerFactory.getLogger(QueueManagerImpl.class);
-    protected static final String APPLICATION_TAG_KEY = "ApplicationTag";
-
     @Autowired
     protected AmazonSQSAsyncClient amazonSQSAsyncClient;
     @Autowired
@@ -54,6 +53,10 @@ public class QueueManagerImpl implements QueueManager {
     protected GeneratedIdEntityInitializer generatedIdEntityInitializer;
 
     protected ObjectMapper mapper;
+    @Autowired
+    private DataManager dataManager;
+    @Autowired
+    private EntityInitializer entityInitializer;
 
     @PostConstruct
     protected void init() {
@@ -121,10 +124,11 @@ public class QueueManagerImpl implements QueueManager {
         }
         Map<String, String> attr = attributesResult.getAttributes();
         QueueInfo queueInfo = initQueueInfoFromAttributes(attr);
+        String queueName = getNameFromAttributes(attr);
 
         queueInfo.setUrl(queueUrl);
-        queueInfo.setName(getNameFromAttributes(attr));
-        queueInfo.setType(getTypeByName(attr));
+        queueInfo.setName(queueName);
+        queueInfo.setType(getTypeByName(queueName));
         setStatusFromCache(queueInfo);
 
         return queueInfo;
@@ -142,8 +146,7 @@ public class QueueManagerImpl implements QueueManager {
         return arnValues[arnValues.length - 1];
     }
 
-    private QueueType getTypeByName(Map<String, String> attr) {
-        String name = getNameFromAttributes(attr);
+    private QueueType getTypeByName(String name) {
         if (name.endsWith(".fifo")) {
             return QueueType.FIFO;
         }
@@ -163,17 +166,28 @@ public class QueueManagerImpl implements QueueManager {
         queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_DELETE);
     }
 
-    public void createQueue(QueueInfo queueInfo) {
-        if(StringUtils.isNotBlank(queueProperties.getQueuePrefix())){
-            queueInfo.setName(queueProperties.getQueuePrefix() + "_" + queueInfo.getName());
+    public void createQueue(CreateQueueRequest createQueueRequest) {
+        String prefix = queueProperties.getQueuePrefix();
+
+        if (StringUtils.isNotBlank(prefix) && createQueueRequest.getQueueName().startsWith(prefix)) {
+            String prefixedName = queueProperties.getQueuePrefix() + "_" + createQueueRequest.getQueueName();
+            createQueueRequest.setQueueName(prefixedName);
         }
 
-        CreateQueueRequest createQueueRequest = new CreateQueueRequestBuilder(queueInfo.getName())
-                .fromQueueType(queueInfo.getType())
-                .withQueueAttributes(queueInfo.getQueueAttributes())
-                .build();
-
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
-        queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_CREATE);
+        queueStatusCache.setPendingStatus(queueInfoFromRequest(createQueueRequest), QueueStatus.ON_CREATE);
+    }
+
+    protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest){
+        Map<String, String> mapAttrs = createQueueRequest.getAttributes();
+        QueueAttributes queueAttributes = mapper.convertValue(mapAttrs, QueueAttributes.class);
+        entityInitializer.initEntity(queueAttributes);
+
+        QueueInfo queueInfo = dataManager.create(QueueInfo.class);
+        queueInfo.setName(createQueueRequest.getQueueName());
+        queueInfo.setType(getTypeByName(createQueueRequest.getQueueName()));
+        queueInfo.setQueueAttributes(queueAttributes);
+
+        return queueInfo;
     }
 }

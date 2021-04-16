@@ -30,7 +30,6 @@ import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
-import java.util.List;
 
 @UiController("awsqueue_QueueInfo.browse")
 @UiDescriptor("queue-info-browse.xml")

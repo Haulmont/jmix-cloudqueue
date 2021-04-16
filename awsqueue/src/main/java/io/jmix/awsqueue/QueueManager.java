@@ -16,6 +16,8 @@
 
 package io.jmix.awsqueue;
 
+import com.amazonaws.services.sqs.model.CreateQueueRequest;
+import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 
 import javax.annotation.Nullable;
@@ -27,7 +29,7 @@ public interface QueueManager {
     @Nullable
     QueueInfo queueInfoFromUrl(String queueUrl);
 
-    void createQueue(QueueInfo queueInfo);
+    void createQueue(CreateQueueRequest createRequest);
 
     void deleteQueue(QueueInfo queueInfo);
 }

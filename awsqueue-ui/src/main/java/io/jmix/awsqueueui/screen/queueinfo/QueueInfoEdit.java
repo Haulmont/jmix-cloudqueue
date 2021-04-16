@@ -17,6 +17,7 @@
 package io.jmix.awsqueueui.screen.queueinfo;
 
 import io.jmix.awsqueue.QueueManagerImpl;
+import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;
@@ -42,22 +43,29 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(getEditedEntity().getQueueAttributes() == null){
+        if (getEditedEntity().getQueueAttributes() == null) {
             getEditedEntity().setQueueAttributes(metadata.create(QueueAttributes.class));
         }
     }
 
 
-
     @Subscribe("commitAndCloseBtn")
     public void onCommitAndCloseBtnClick(Button.ClickEvent event) {
-        queueInfoManager.createQueue(getEditedEntity());
+        QueueInfo queueInfo = getEditedEntity();
+        QueueAttributes attributes = queueInfo.getQueueAttributes();
+
+        queueInfoManager.createQueue(new CreateQueueRequestBuilder(queueInfo.getName())
+                .withDeliveryTime(attributes.getDeliveryTime())
+                .withMaximumMessageSize(attributes.getMaximumMessageSize())
+                .withMessageRetentionPeriod(attributes.getMessageRetentionPeriod())
+                .withVisibilityTimeout(attributes.getVisibilityTimeout())
+                .build());
     }
 
     @Subscribe("typeField")
     public void onTypeFieldValueChange(HasValue.ValueChangeEvent<QueueType> event) {
-        if(!nameField.isEmpty())
-        nameField.setValue(getQueueName());
+        if (!nameField.isEmpty())
+            nameField.setValue(getQueueName());
     }
 
     @Install(to = "nameField", subject = "validator")

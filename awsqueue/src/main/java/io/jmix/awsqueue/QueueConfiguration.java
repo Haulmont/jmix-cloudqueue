@@ -17,10 +17,8 @@
 package io.jmix.awsqueue;
 
 import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.jmix.core.CoreConfiguration;
@@ -53,7 +51,7 @@ public class QueueConfiguration {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(name = "awsqueue_amazonSQSAsyncClient")
+    @ConditionalOnMissingBean(name = "awsqueue_AmazonSQSAsyncClient")
     public AmazonSQSAsyncClient amazonSQSAsyncClient() {
         if (queueProperties.getAccessKey() != null && queueProperties.getSecretKey() != null) {
             return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder
