@@ -17,8 +17,10 @@
 package io.jmix.awsqueueui.screen.queueinfo;
 
 import io.jmix.awsqueue.QueueManagerImpl;
+import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;
+import io.jmix.core.Metadata;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,17 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
     private ComboBox<QueueType> typeField;
     @Autowired
     private QueueManagerImpl queueInfoManager;
+    @Autowired
+    private Metadata metadata;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if(getEditedEntity().getQueueAttributes() == null){
+            getEditedEntity().setQueueAttributes(metadata.create(QueueAttributes.class));
+        }
+    }
+
+
 
     @Subscribe("commitAndCloseBtn")
     public void onCommitAndCloseBtnClick(Button.ClickEvent event) {
@@ -55,7 +68,7 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
     }
 
     protected String getQueueName() {
-        if (typeField.getValue().equals(QueueType.FIFO)) {
+        if (typeField.getValue() == QueueType.FIFO) {
             if (!nameField.getRawValue().endsWith(".fifo")) {
                 return nameField.getRawValue() + ".fifo";
             }

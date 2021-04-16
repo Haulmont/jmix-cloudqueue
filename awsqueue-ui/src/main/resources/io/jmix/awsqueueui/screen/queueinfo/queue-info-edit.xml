@@ -43,11 +43,11 @@
             <column width="350px">
                 <textField id="nameField" property="name"/>
                 <comboBox id="typeField" property="type"/>
-                <textField id="maximumMessageSizeField" property="maximumMessageSize"/>
-                <textField id="messageRetentionPeriodField" property="messageRetentionPeriod"/>
-                <textField id="visibilityTimeoutField" property="visibilityTimeout"/>
-                <textField id="deliveryTimeField" property="deliveryTime"/>
-                <textField id="receiveMessageWaitTimeField" property="receiveMessageWaitTime"/>
+                <textField id="maximumMessageSizeField" property="queueAttributes.maximumMessageSize"/>
+                <textField id="messageRetentionPeriodField" property="queueAttributes.messageRetentionPeriod"/>
+                <textField id="visibilityTimeoutField" property="queueAttributes.visibilityTimeout"/>
+                <textField id="deliveryTimeField" property="queueAttributes.deliveryTime"/>
+                <textField id="receiveMessageWaitTimeField" property="queueAttributes.receiveMessageWaitTime"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

@@ -29,17 +29,17 @@ public class QueueProperties {
     protected String secretKey;
     protected String region;
 
-    protected String queueFamilyTag;
+    protected String queuePrefix;
 
     public QueueProperties(String accessKey,
                            String secretKey,
                            @Nullable String region,
-                           @Nullable String queueFamilyTag) {
+                           @Nullable String queuePrefix) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.region = region != null ? region : Regions.DEFAULT_REGION.getName();
 
-        this.queueFamilyTag = queueFamilyTag;
+        this.queuePrefix = queuePrefix;
     }
 
     public String getAccessKey() {
@@ -66,11 +66,11 @@ public class QueueProperties {
         this.region = region;
     }
 
-    public String getQueueFamilyTag() {
-        return queueFamilyTag;
+    public String getQueuePrefix() {
+        return queuePrefix;
     }
 
-    public void setQueueFamilyTag(String queueFamilyTag) {
-        this.queueFamilyTag = queueFamilyTag;
+    public void setQueuePrefix(String queueFamilyTag) {
+        this.queuePrefix = queueFamilyTag;
     }
 }

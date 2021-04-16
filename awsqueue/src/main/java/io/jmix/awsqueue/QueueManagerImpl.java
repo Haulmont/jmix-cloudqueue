@@ -22,8 +22,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
-import io.jmix.awsqueue.entity.QueueStatus;
+import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.awsqueue.entity.QueueStatus;
 import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
@@ -34,8 +35,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueManagerImpl")
@@ -62,7 +62,7 @@ public class QueueManagerImpl implements QueueManager {
 
     }
 
-    public List<QueueInfo> loadFromApi() {
+    public Map<String, QueueInfo> loadFromApi() {
         return amazonSQSAsyncClient
                 .listQueues()
                 .getQueueUrls()
@@ -70,11 +70,12 @@ public class QueueManagerImpl implements QueueManager {
                 .filter(this::isInternalExistingQueue)
                 .map(this::queueInfoFromUrl)
                 .filter(ObjectUtils::isNotEmpty)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(QueueInfo::getName, queueInfo -> queueInfo));
+
     }
 
     protected boolean isInternalExistingQueue(String queueUrl) {
-        String queueFamilyTag = queueProperties.getQueueFamilyTag();
+        String queueFamilyTag = queueProperties.getQueuePrefix();
 
         if (queueFamilyTag != null) {
             try {
@@ -88,24 +89,23 @@ public class QueueManagerImpl implements QueueManager {
         return true;
     }
 
-    public List<QueueInfo> loadAll() {
-        List<QueueInfo> resultQueues = loadFromApi();
+    public Collection<QueueInfo> loadAll() {
+        Map<String, QueueInfo> resultQueues = loadFromApi();
         syncCacheWithApi(resultQueues);
-        resultQueues.addAll(queueStatusCache.getPendingQueues());
-        return resultQueues;
+        Collection<QueueInfo> queueInfoList = new ArrayList<>();
+        queueInfoList.addAll(queueStatusCache.getPendingQueues());
+        queueInfoList.addAll(resultQueues.values());
+        return queueInfoList;
     }
 
-    protected void syncCacheWithApi(List<QueueInfo> apiQueues) {
+    protected void syncCacheWithApi(Map<String, QueueInfo> apiQueues) {
         for (String queueName : queueStatusCache.getPendingNames()) {
-            if (apiQueues.stream()
-                    .anyMatch(t -> t.getName().equals(queueName))) {
-                QueueInfo queueInfo = queueStatusCache.getPendingQueue(queueName);
+            QueueInfo queueInfo = queueStatusCache.getPendingQueue(queueName);
+            if (apiQueues.containsKey(queueName)) {
                 if (queueInfo.getStatus().equals(QueueStatus.ON_CREATE)) {
                     queueStatusCache.removeFromCache(queueName);
                 }
-            } else if (apiQueues.stream()
-                    .noneMatch(t -> t.getName().equals(queueName))) {
-                QueueInfo queueInfo = queueStatusCache.getPendingQueue(queueName);
+            } else {
                 if (queueInfo.getStatus().equals(QueueStatus.ON_DELETE)) {
                     queueStatusCache.removeFromCache(queueName);
                 }
@@ -148,6 +148,7 @@ public class QueueManagerImpl implements QueueManager {
     private QueueInfo initQueueInfoFromAttributes(Map<String, String> attr) {
         QueueInfo queueInfo = mapper.convertValue(attr, QueueInfo.class);
         generatedIdEntityInitializer.initEntity(queueInfo);
+        generatedIdEntityInitializer.initEntity(queueInfo.getQueueAttributes());
         return queueInfo;
     }
 
@@ -178,10 +179,10 @@ public class QueueManagerImpl implements QueueManager {
     }
 
     public void createQueue(QueueInfo queueInfo) {
-        CreateQueueRequest createQueueRequest = new CreateQueueRequestBuilder(queueInfo)
-                .withInnerQueueType()
-                .withInnerQueueAttributes()
-                .withPrefixIfNotNull(queueProperties.getQueueFamilyTag())
+        CreateQueueRequest createQueueRequest = new CreateQueueRequestBuilder(queueInfo.getName())
+                .fromQueueType(queueInfo.getType())
+                .withQueueAttributes(queueInfo.getQueueAttributes())
+                .withPrefixIfNotNull(queueProperties.getQueuePrefix())
                 .build();
 
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);

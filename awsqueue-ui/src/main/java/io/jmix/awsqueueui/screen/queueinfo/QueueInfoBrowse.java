@@ -29,6 +29,7 @@ import io.jmix.ui.screen.LookupComponent;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
 
 @UiController("awsqueue_QueueInfo.browse")
@@ -58,8 +59,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-        List<QueueInfo> states = queueInfoManager.loadAll();
-
+        Collection<QueueInfo> states = queueInfoManager.loadAll();
         queueInfoDc.setItems(states);
         getScreenData().loadAll();
     }
