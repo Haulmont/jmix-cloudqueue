@@ -17,7 +17,6 @@
 package io.jmix.awsqueueui.screen.queueinfo;
 
 import io.jmix.awsqueue.QueueManager;
-import io.jmix.awsqueue.QueueManagerImpl;
 import io.jmix.awsqueue.QueueProperties;
 import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueAttributes;
@@ -34,11 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @UiDescriptor("queue-info-edit.xml")
 @EditedEntityContainer("queueInfoDc")
 public class QueueInfoEdit extends StandardEditor<QueueInfo> {
-
     @Autowired
     private TextField<String> nameField;
     @Autowired
-    private ComboBox<QueueType> typeField;
+    private TextField<String> physicalNameField;
     @Autowired
     private QueueManager queueManager;
     @Autowired
@@ -53,11 +51,9 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
         }
     }
 
-
     @Subscribe("commitAndCloseBtn")
     public void onCommitAndCloseBtnClick(Button.ClickEvent event) {
         QueueInfo queueInfo = getEditedEntity();
-        setNameForPrefix(queueInfo);
         QueueAttributes attributes = queueInfo.getQueueAttributes();
 
         queueManager.createQueue(new CreateQueueRequestBuilder(queueInfo.getName())
@@ -70,37 +66,20 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
                 .build());
     }
 
-    protected void setNameForPrefix(QueueInfo queueInfo){
-        String prefix = queueProperties.getQueuePrefix();
-        if (StringUtils.isNotBlank(prefix) && !queueInfo.getName().startsWith(prefix)) {
-            String prefixedName = queueProperties.getQueuePrefix() + "_" + queueInfo.getName();
-            queueInfo.setName(prefixedName);
-        }
+    @Subscribe("nameField")
+    public void onNameFieldTextChange(TextInputField.TextChangeEvent event) {
+        physicalNameField.setValue(
+                getEditedEntity().generatePhysicalName(nameField.getRawValue(),
+                        queueProperties.getQueuePrefix()));
     }
 
     @Subscribe("typeField")
     public void onTypeFieldValueChange(HasValue.ValueChangeEvent<QueueType> event) {
-        if (!nameField.isEmpty())
-            nameField.setValue(getQueueName());
+        physicalNameField.setValue(
+                getEditedEntity().generatePhysicalName(nameField.getRawValue(),
+                        queueProperties.getQueuePrefix()));
     }
 
-    @Install(to = "nameField", subject = "validator")
-    private void nameFieldValidator(String value) {
-        if (!value.endsWith(".fifo") && !typeField.isEmpty() && typeField.getValue() == (QueueType.FIFO)) {
-            throw new ValidationException("Name must ends with .fifo postfix");
-        }
-    }
 
-    protected String getQueueName() {
-        if (typeField.getValue() == QueueType.FIFO) {
-            if (!nameField.getRawValue().endsWith(".fifo")) {
-                return nameField.getRawValue() + ".fifo";
-            }
-        } else {
-            if (nameField.getRawValue().endsWith(".fifo")) {
-                return nameField.getRawValue().replace(".fifo", "");
-            }
-        }
-        return nameField.getRawValue();
-    }
+
 }

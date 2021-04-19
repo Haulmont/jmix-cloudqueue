@@ -21,18 +21,14 @@ import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueStatus;
 import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.DataManager;
-import io.jmix.core.EntityInitializer;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,10 +47,10 @@ public class QueueManagerImpl implements QueueManager {
     protected QueueProperties queueProperties;
     @Autowired
     protected GeneratedIdEntityInitializer generatedIdEntityInitializer;
-
-    protected ObjectMapper mapper;
     @Autowired
     private DataManager dataManager;
+
+    protected ObjectMapper mapper;
 
     @PostConstruct
     protected void init() {
@@ -71,34 +67,41 @@ public class QueueManagerImpl implements QueueManager {
                 .stream()
                 .map(this::queueInfoFromUrl)
                 .filter(ObjectUtils::isNotEmpty)
-                .collect(Collectors.toMap(QueueInfo::getName, queueInfo -> queueInfo));
-
+                .collect(Collectors.toMap(QueueInfo::getUrl, queueInfo -> queueInfo));
     }
 
+    @Override
     public Collection<QueueInfo> loadAll() {
-        Map<String, QueueInfo> resultQueues = loadFromApi();
-        syncCacheWithApi(resultQueues);
-        Collection<QueueInfo> queueInfoList = new ArrayList<>();
-        queueInfoList.addAll(queueStatusCache.getPendingQueues());
-        queueInfoList.addAll(resultQueues.values());
-        return queueInfoList;
+        Map<String, QueueInfo> apiQueues = loadFromApi();
+        invalidateCreatedQueues(apiQueues);
+        invalidateDeletedQueues(apiQueues);
+
+        Collection<QueueInfo> apiNotDeletedQueues = apiQueues.values()
+                .stream()
+                .filter(t -> !queueStatusCache.isOnDeletion(t.getUrl()))
+                .collect(Collectors.toList());
+        apiNotDeletedQueues.addAll(queueStatusCache.getCreatedQueues());
+
+        return apiNotDeletedQueues;
     }
 
-    protected void syncCacheWithApi(Map<String, QueueInfo> apiQueues) {
-        for (String queueName : queueStatusCache.getPendingNames()) {
-            QueueInfo queueInfo = queueStatusCache.getPendingQueue(queueName);
-            if (apiQueues.containsKey(queueName)) {
-                if (queueInfo.getStatus().equals(QueueStatus.ON_CREATE)) {
-                    queueStatusCache.removeFromCache(queueName);
-                }
-            } else {
-                if (queueInfo.getStatus().equals(QueueStatus.ON_DELETE)) {
-                    queueStatusCache.removeFromCache(queueName);
-                }
+    protected void invalidateCreatedQueues(Map<String, QueueInfo> apiQueues) {
+        for (String queueName : apiQueues.values().stream().map(QueueInfo::getName).collect(Collectors.toList())) {
+            if (queueStatusCache.isOnCreation(queueName)) {
+                queueStatusCache.unassignCreated(queueName);
             }
         }
     }
 
+    protected void invalidateDeletedQueues(Map<String, QueueInfo> apiQueues) {
+        for (String removedQueueUrl : queueStatusCache.getDeletedQueueUrls()) {
+            if (!apiQueues.containsKey(removedQueueUrl)) {
+                queueStatusCache.setTotallyDeleted(removedQueueUrl);
+            }
+        }
+    }
+
+    @Override
     @Nullable
     public QueueInfo queueInfoFromUrl(String queueUrl) {
         GetQueueAttributesRequest request = new GetQueueAttributesRequest()
@@ -127,7 +130,7 @@ public class QueueManagerImpl implements QueueManager {
         queueInfo.setUrl(queueUrl);
         queueInfo.setName(queueName);
         queueInfo.setType(getTypeByName(queueName));
-        setStatusFromCache(queueInfo);
+        queueInfo.setStatus(QueueStatus.RUNNING);
 
         return queueInfo;
     }
@@ -151,41 +154,31 @@ public class QueueManagerImpl implements QueueManager {
         return QueueType.STANDARD;
     }
 
-    private void setStatusFromCache(QueueInfo queueInfo) {
-        if (queueStatusCache.isNotAvailable(queueInfo)) {
-            queueInfo.setStatus(queueStatusCache.getPendingStatus(queueInfo));
-        } else {
-            queueInfo.setStatus(QueueStatus.RUNNING);
-        }
-    }
-
-    public void deleteQueue(QueueInfo queueInfo) {
-        amazonSQSAsyncClient.deleteQueueAsync(queueInfo.getUrl());
-        queueStatusCache.setPendingStatus(queueInfo, QueueStatus.ON_DELETE);
-    }
-
+    @Override
     public void createQueue(CreateQueueRequest createQueueRequest) {
-        String prefix = queueProperties.getQueuePrefix();
-
-        if (StringUtils.isNotBlank(prefix) && !createQueueRequest.getQueueName().startsWith(prefix)) {
-            String prefixedName = queueProperties.getQueuePrefix() + "_" + createQueueRequest.getQueueName();
-            createQueueRequest.setQueueName(prefixedName);
-        }
-
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
-        queueStatusCache.setPendingStatus(queueInfoFromRequest(createQueueRequest), QueueStatus.ON_CREATE);
+        queueStatusCache.setOnCreation(queueInfoFromRequest(createQueueRequest));
     }
 
-    protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest){
+    protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest) {
         Map<String, String> mapAttrs = createQueueRequest.getAttributes();
         QueueAttributes queueAttributes = mapper.convertValue(mapAttrs, QueueAttributes.class);
         generatedIdEntityInitializer.initEntity(queueAttributes);
 
         QueueInfo queueInfo = dataManager.create(QueueInfo.class);
-        queueInfo.setName(createQueueRequest.getQueueName());
+
+        queueInfo.setName(queueInfo.generatePhysicalName(
+                createQueueRequest.getQueueName(), queueProperties.getQueuePrefix()));
         queueInfo.setType(getTypeByName(createQueueRequest.getQueueName()));
         queueInfo.setQueueAttributes(queueAttributes);
+        queueInfo.setStatus(QueueStatus.CREATING);
 
         return queueInfo;
+    }
+
+    @Override
+    public void deleteQueue(String queueUrl) {
+        amazonSQSAsyncClient.deleteQueueAsync(queueUrl);
+        queueStatusCache.setOnDeletion(queueUrl);
     }
 }

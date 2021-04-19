@@ -16,6 +16,7 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
+import com.amazonaws.services.sqs.model.DeleteQueueRequest;
 import io.jmix.awsqueue.QueueManager;
 import io.jmix.awsqueue.QueueManagerImpl;
 import io.jmix.awsqueue.QueueStatusCache;
@@ -28,6 +29,7 @@ import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.LookupComponent;
 import io.jmix.ui.screen.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
@@ -72,7 +74,11 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
 
     @Subscribe("queueInfoDataGrid.remove")
     public void onQueueStatesTableRemove(Action.ActionPerformedEvent event) {
-        queueManager.deleteQueue(queueInfoDataGrid.getSingleSelected());
+        QueueInfo toDelete = queueInfoDataGrid.getSingleSelected();
+        if(ObjectUtils.isNotEmpty(toDelete)){
+            queueManager.deleteQueue(toDelete.getUrl());
+            queueInfoDc.getMutableItems().remove(toDelete);
+        }
     }
 
     @Install(to = "queueInfoDataGrid", subject = "detailsGenerator")

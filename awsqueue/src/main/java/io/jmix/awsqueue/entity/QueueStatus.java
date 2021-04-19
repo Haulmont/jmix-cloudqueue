@@ -23,8 +23,7 @@ import javax.annotation.Nullable;
 public enum QueueStatus implements EnumClass<Integer> {
 
     RUNNING(10),
-    ON_DELETE(20),
-    ON_CREATE(30);
+    CREATING(20);
 
     private Integer id;
 

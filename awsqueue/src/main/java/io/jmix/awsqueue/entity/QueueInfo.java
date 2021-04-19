@@ -26,13 +26,17 @@ import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JmixEntity(annotatedPropertiesOnly = true)
 public class QueueInfo {
+    private static final String FIFO_POSTFIX = ".fifo";
 
     @JmixGeneratedValue
     @JmixProperty(mandatory = true)
@@ -165,5 +169,24 @@ public class QueueInfo {
 
     public void setQueueAttributes(QueueAttributes queueAttributes) {
         this.queueAttributes = queueAttributes;
+    }
+
+    public String generatePhysicalName(String previewName, String prefix){
+        String realName = previewName;
+        if(StringUtils.isNotBlank(previewName) && type != null){
+            if(QueueType.fromId(type) == QueueType.FIFO){
+                if (!previewName.endsWith(FIFO_POSTFIX)) {
+                    realName = realName + FIFO_POSTFIX;
+                }
+            } else {
+                if (previewName.endsWith(FIFO_POSTFIX)) {
+                    realName = previewName.replace(FIFO_POSTFIX, StringUtils.EMPTY);
+                }
+            }
+            if(StringUtils.isNotBlank(prefix) && !previewName.startsWith(prefix)){
+                realName = prefix + "_" + realName;
+            }
+        }
+        return realName;
     }
 }

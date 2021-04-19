@@ -24,52 +24,60 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component("awsqueue_QueueStatusCache")
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class QueueStatusCache {
-    protected Map<String, QueueInfo> pendingQueues;
+    protected Map<String, QueueInfo> pendingCreationQueues;
+    protected Collection<String> deletedQueueUrls;
 
     @PostConstruct
     protected void init() {
-        pendingQueues = new ConcurrentHashMap<>();
+        pendingCreationQueues = new ConcurrentHashMap<>();
+        deletedQueueUrls = ConcurrentHashMap.newKeySet();
     }
 
-    public Collection<String> getPendingNames() {
-        return pendingQueues.keySet();
+    public boolean isOnCreation(String queueName) {
+        return pendingCreationQueues.containsKey(queueName);
     }
 
-    public Collection<QueueInfo> getPendingQueues() {
-        return pendingQueues.values();
+    public void setOnCreation(QueueInfo queue) {
+        queue.setStatus(QueueStatus.CREATING);
+        pendingCreationQueues.put(queue.getName(), queue);
     }
 
-    public void removeFromCache(String name) {
-        pendingQueues.remove(name);
+    public void unassignCreated(String queueName) {
+        pendingCreationQueues.remove(queueName);
+    }
+
+    public Collection<QueueInfo> getCreatedQueues() {
+        return pendingCreationQueues.values();
+    }
+
+    public boolean isOnDeletion(String queueUrl) {
+        return deletedQueueUrls.contains(queueUrl);
+    }
+
+    public void setOnDeletion(String queueUrl) {
+        deletedQueueUrls.add(queueUrl);
+    }
+
+    public Collection<String> getDeletedQueueUrls() {
+        return deletedQueueUrls;
+    }
+
+    public void setTotallyDeleted(String queueUrl) {
+        if (isOnDeletion(queueUrl)) {
+            deletedQueueUrls.add(queueUrl);
+        }
     }
 
     public boolean isNotAvailable(QueueInfo queue) {
-        return pendingQueues.containsKey(queue.getName());
-    }
-
-    public boolean isNotAvailable(String queueName) {
-        return pendingQueues.containsKey(queueName);
-    }
-
-    public void setPendingStatus(QueueInfo queue, QueueStatus status) {
-        queue.setStatus(status);
-        pendingQueues.put(queue.getName(), queue);
-    }
-
-    public QueueStatus getPendingStatus(QueueInfo queue) {
-        if (isNotAvailable(queue)) {
-            pendingQueues.get(queue.getName());
-        }
-        return QueueStatus.RUNNING;
-    }
-
-    public QueueInfo getPendingQueue(String name) {
-        return pendingQueues.get(name);
+        return pendingCreationQueues.containsKey(queue.getName()) &&
+                deletedQueueUrls.contains(queue.getName());
     }
 }
