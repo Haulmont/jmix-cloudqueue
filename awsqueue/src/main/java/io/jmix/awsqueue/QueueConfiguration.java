@@ -64,7 +64,7 @@ public class QueueConfiguration {
         }
     }
 
-    protected AWSCredentials getBasicAwsCredentials(){
+    protected AWSCredentials getBasicAwsCredentials() {
         return new BasicAWSCredentials(queueProperties.getAccessKey(), queueProperties.getSecretKey());
     }
 

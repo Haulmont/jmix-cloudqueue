@@ -22,10 +22,10 @@ import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;
+import io.jmix.awsqueue.utils.QueueInfoUtils;
 import io.jmix.core.Metadata;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PrimaryEditorScreen(QueueInfo.class)
@@ -43,6 +43,8 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
     private Metadata metadata;
     @Autowired
     private QueueProperties queueProperties;
+    @Autowired
+    private ComboBox<QueueType> typeField;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -68,18 +70,19 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
 
     @Subscribe("nameField")
     public void onNameFieldTextChange(TextInputField.TextChangeEvent event) {
-        physicalNameField.setValue(
-                getEditedEntity().generatePhysicalName(nameField.getRawValue(),
-                        queueProperties.getQueuePrefix()));
+        physicalNameField.setValue(QueueInfoUtils.generatePhysicalName(
+                nameField.getRawValue(),
+                typeField.getValue(),
+                queueProperties.getQueuePrefix()));
     }
 
     @Subscribe("typeField")
     public void onTypeFieldValueChange(HasValue.ValueChangeEvent<QueueType> event) {
-        physicalNameField.setValue(
-                getEditedEntity().generatePhysicalName(nameField.getRawValue(),
-                        queueProperties.getQueuePrefix()));
+        physicalNameField.setValue(QueueInfoUtils.generatePhysicalName(
+                nameField.getRawValue(),
+                typeField.getValue(),
+                queueProperties.getQueuePrefix()));
     }
-
 
 
 }

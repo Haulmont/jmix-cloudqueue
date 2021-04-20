@@ -29,7 +29,6 @@ public class QueueProperties {
     protected String accessKey;
     protected String secretKey;
     protected String region;
-
     protected String queuePrefix;
 
     public QueueProperties(String accessKey,

@@ -75,7 +75,7 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
     @Subscribe("queueInfoDataGrid.remove")
     public void onQueueStatesTableRemove(Action.ActionPerformedEvent event) {
         QueueInfo toDelete = queueInfoDataGrid.getSingleSelected();
-        if(ObjectUtils.isNotEmpty(toDelete)){
+        if (ObjectUtils.isNotEmpty(toDelete)) {
             queueManager.deleteQueue(toDelete.getUrl());
             queueInfoDc.getMutableItems().remove(toDelete);
         }

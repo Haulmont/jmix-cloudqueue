@@ -59,10 +59,6 @@ public class QueueStatusCache {
         return creatingQueues.values();
     }
 
-    public boolean isDeleting(String queueUrl) {
-        return deletedQueueUrls.contains(queueUrl);
-    }
-
     public void setDeleting(String queueUrl) {
         deletedQueueUrls.add(queueUrl);
     }

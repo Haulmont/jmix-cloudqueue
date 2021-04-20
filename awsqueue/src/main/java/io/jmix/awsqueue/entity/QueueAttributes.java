@@ -89,6 +89,7 @@ public class QueueAttributes {
     public void setVisibilityTimeout(Long visibilityTimeout) {
         this.visibilityTimeout = visibilityTimeout;
     }
+
     public Long getReceiveMessageWaitTime() {
         return receiveMessageWaitTime;
     }
