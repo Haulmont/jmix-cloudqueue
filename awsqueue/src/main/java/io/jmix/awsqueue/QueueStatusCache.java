@@ -16,68 +16,59 @@
 
 package io.jmix.awsqueue;
 
-import io.jmix.awsqueue.entity.QueueStatus;
 import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.awsqueue.entity.QueueStatus;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueStatusCache")
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class QueueStatusCache {
-    protected Map<String, QueueInfo> pendingCreationQueues;
-    protected Collection<String> deletedQueueUrls;
+    protected Map<String, QueueInfo> creatingQueues;
+    protected Set<String> deletedQueueUrls;
 
     @PostConstruct
     protected void init() {
-        pendingCreationQueues = new ConcurrentHashMap<>();
+        creatingQueues = new ConcurrentHashMap<>();
         deletedQueueUrls = ConcurrentHashMap.newKeySet();
     }
 
-    public boolean isOnCreation(String queueName) {
-        return pendingCreationQueues.containsKey(queueName);
+    public void invalidate(Map<String, QueueInfo> actualData) {
+        creatingQueues.keySet().removeAll(actualData
+                .values()
+                .stream()
+                .map(QueueInfo::getName)
+                .collect(Collectors.toList()));
+        deletedQueueUrls.retainAll(actualData.keySet());
     }
 
-    public void setOnCreation(QueueInfo queue) {
+    public void setCreating(QueueInfo queue) {
         queue.setStatus(QueueStatus.CREATING);
-        pendingCreationQueues.put(queue.getName(), queue);
+        creatingQueues.put(queue.getName(), queue);
     }
 
-    public void unassignCreated(String queueName) {
-        pendingCreationQueues.remove(queueName);
+    public Collection<QueueInfo> getCreatingQueues() {
+        return creatingQueues.values();
     }
 
-    public Collection<QueueInfo> getCreatedQueues() {
-        return pendingCreationQueues.values();
-    }
-
-    public boolean isOnDeletion(String queueUrl) {
+    public boolean isDeleting(String queueUrl) {
         return deletedQueueUrls.contains(queueUrl);
     }
 
-    public void setOnDeletion(String queueUrl) {
+    public void setDeleting(String queueUrl) {
         deletedQueueUrls.add(queueUrl);
     }
 
-    public Collection<String> getDeletedQueueUrls() {
-        return deletedQueueUrls;
-    }
-
-    public void setTotallyDeleted(String queueUrl) {
-        if (isOnDeletion(queueUrl)) {
-            deletedQueueUrls.add(queueUrl);
-        }
-    }
-
     public boolean isNotAvailable(QueueInfo queue) {
-        return pendingCreationQueues.containsKey(queue.getName()) &&
+        return creatingQueues.containsKey(queue.getName()) &&
                 deletedQueueUrls.contains(queue.getName());
     }
 }

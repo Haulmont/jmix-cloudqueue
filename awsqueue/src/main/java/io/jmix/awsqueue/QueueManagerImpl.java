@@ -17,7 +17,10 @@
 package io.jmix.awsqueue;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
-import com.amazonaws.services.sqs.model.*;
+import com.amazonaws.services.sqs.model.CreateQueueRequest;
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
+import com.amazonaws.services.sqs.model.GetQueueAttributesResult;
+import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -28,13 +31,13 @@ import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.core.DataManager;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueManagerImpl")
@@ -73,32 +76,15 @@ public class QueueManagerImpl implements QueueManager {
     @Override
     public Collection<QueueInfo> loadAll() {
         Map<String, QueueInfo> apiQueues = loadFromApi();
-        invalidateCreatedQueues(apiQueues);
-        invalidateDeletedQueues(apiQueues);
+        queueStatusCache.invalidate(apiQueues);
 
         Collection<QueueInfo> apiNotDeletedQueues = apiQueues.values()
                 .stream()
-                .filter(t -> !queueStatusCache.isOnDeletion(t.getUrl()))
+                .filter(t -> !queueStatusCache.isDeleting(t.getUrl()))
                 .collect(Collectors.toList());
-        apiNotDeletedQueues.addAll(queueStatusCache.getCreatedQueues());
+        apiNotDeletedQueues.addAll(queueStatusCache.getCreatingQueues());
 
         return apiNotDeletedQueues;
-    }
-
-    protected void invalidateCreatedQueues(Map<String, QueueInfo> apiQueues) {
-        for (String queueName : apiQueues.values().stream().map(QueueInfo::getName).collect(Collectors.toList())) {
-            if (queueStatusCache.isOnCreation(queueName)) {
-                queueStatusCache.unassignCreated(queueName);
-            }
-        }
-    }
-
-    protected void invalidateDeletedQueues(Map<String, QueueInfo> apiQueues) {
-        for (String removedQueueUrl : queueStatusCache.getDeletedQueueUrls()) {
-            if (!apiQueues.containsKey(removedQueueUrl)) {
-                queueStatusCache.setTotallyDeleted(removedQueueUrl);
-            }
-        }
     }
 
     @Override
@@ -157,7 +143,7 @@ public class QueueManagerImpl implements QueueManager {
     @Override
     public void createQueue(CreateQueueRequest createQueueRequest) {
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
-        queueStatusCache.setOnCreation(queueInfoFromRequest(createQueueRequest));
+        queueStatusCache.setCreating(queueInfoFromRequest(createQueueRequest));
     }
 
     protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest) {
@@ -179,6 +165,6 @@ public class QueueManagerImpl implements QueueManager {
     @Override
     public void deleteQueue(String queueUrl) {
         amazonSQSAsyncClient.deleteQueueAsync(queueUrl);
-        queueStatusCache.setOnDeletion(queueUrl);
+        queueStatusCache.setDeleting(queueUrl);
     }
 }
