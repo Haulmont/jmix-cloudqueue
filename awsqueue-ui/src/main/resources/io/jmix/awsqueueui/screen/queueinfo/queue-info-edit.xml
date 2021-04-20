@@ -41,8 +41,9 @@
     <layout spacing="true" expand="editActions">
         <form id="form" dataContainer="queueInfoDc">
             <column width="350px">
-                <textField id="nameField" caption="msg://queueName"/>
-                <textField id="physicalNameField" property="name" editable="false" caption="msg://previewPhysicalQueueName"/>
+                <textField id="nameField" caption="msg://queueName" textChangeEventMode="EAGER"/>
+                <textField id="physicalNameField" property="name" editable="false" caption="msg://previewPhysicalQueueName"
+                           textChangeEventMode="EAGER"/>
                 <comboBox id="typeField" property="type"/>
                 <textField id="maximumMessageSizeField" property="queueAttributes.maximumMessageSize"/>
                 <textField id="messageRetentionPeriodField" property="queueAttributes.messageRetentionPeriod"/>

@@ -28,6 +28,6 @@ create queues without any tag
 
 Add AWS family queues tag to use only tagged to restrict queues in your application
 ```
-jmix.awsqueue.queue-family-tag = jmixqueues
+jmix.awsqueue.queue-prefix = jmixqueues
 ```
 After this ADD-on will create and load only 'jmixqueues' tagged queues.
