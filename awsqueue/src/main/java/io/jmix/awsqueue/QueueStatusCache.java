@@ -63,6 +63,10 @@ public class QueueStatusCache {
         deletedQueueUrls.add(queueUrl);
     }
 
+    public Set<String> getDeletedQueueUrls() {
+        return deletedQueueUrls;
+    }
+
     public boolean isNotAvailable(QueueInfo queue) {
         return creatingQueues.containsKey(queue.getName()) &&
                 deletedQueueUrls.contains(queue.getName());

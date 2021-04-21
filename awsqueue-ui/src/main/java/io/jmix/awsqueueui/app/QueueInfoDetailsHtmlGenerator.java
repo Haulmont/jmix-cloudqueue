@@ -29,7 +29,7 @@ public class QueueInfoDetailsHtmlGenerator {
         sb.append("<tr>");
         sb.append("<td>").append(awsFormat(queueInfo.getCreated(), LocalDateTime.class)).append("</td>");
         sb.append("<td>").append(awsFormat(queueInfo.getQueueAttributes().getMaximumMessageSize(), Long.class))
-                .append(messages.getMessage("io.jmix.awsqueueui.app/Bytes")).append("</td>");
+                .append(" ").append(messages.getMessage("io.jmix.awsqueueui.app/Bytes")).append("</td>");
         sb.append("<td>").append(awsFormat(queueInfo.getLastUpdate(), LocalDateTime.class)).append("</td>");
         sb.append("</tr>").append("</table>");
         sb.append("<table spacing=3px padding=3px>")
@@ -40,9 +40,9 @@ public class QueueInfoDetailsHtmlGenerator {
                 .append("</tr>");
         sb.append("<tr>");
         sb.append("<td>").append(awsFormat(queueInfo.getQueueAttributes().getMessageRetentionPeriod(), Long.class))
-                .append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
+                .append(" ").append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
         sb.append("<td>").append(awsFormat(queueInfo.getQueueAttributes().getVisibilityTimeout(), Long.class))
-                .append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
+                .append(" ").append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
         sb.append("<td>").append(awsFormat(queueInfo.getMessagesAvailable(), Long.class)).append("</td>");
         sb.append("</tr>").append("</table>");
         sb.append("<table spacing=3px padding=3px>")
@@ -53,10 +53,10 @@ public class QueueInfoDetailsHtmlGenerator {
                 .append("</tr>");
         sb.append("<tr>");
         sb.append("<td>").append(awsFormat(queueInfo.getQueueAttributes().getDeliveryTime(), Long.class))
-                .append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
+                .append(" ").append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
         sb.append("<td>").append(awsFormat(queueInfo.getMessagesInFlight(), Long.class)).append("</td>");
         sb.append("<td>").append(awsFormat(queueInfo.getQueueAttributes().getReceiveMessageWaitTime(), Long.class))
-                .append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
+                .append(" ").append(messages.getMessage("io.jmix.awsqueueui.app/TimeSecs")).append("</td>");
         sb.append("</tr>").append("</table>");
         sb.append("<table spacing=3px padding=3px>")
                 .append("<tr>")
@@ -78,7 +78,6 @@ public class QueueInfoDetailsHtmlGenerator {
         } else if (clazz.equals(LocalDateTime.class)) {
             return "N/A";
         }
-
         return StringUtils.EMPTY;
     }
 }

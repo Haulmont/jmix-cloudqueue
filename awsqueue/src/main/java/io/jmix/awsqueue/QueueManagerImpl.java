@@ -31,12 +31,12 @@ import io.jmix.awsqueue.entity.QueueType;
 import io.jmix.awsqueue.utils.QueueInfoUtils;
 import io.jmix.core.DataManager;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -79,8 +79,10 @@ public class QueueManagerImpl implements QueueManager {
     public Collection<QueueInfo> loadAll() {
         Map<String, QueueInfo> apiQueues = loadFromApi();
         queueStatusCache.invalidate(apiQueues);
-        apiQueues.keySet().removeAll(queueStatusCache.deletedQueueUrls);
-        return CollectionUtils.union(apiQueues.values(), queueStatusCache.getCreatingQueues());
+        apiQueues.keySet().removeAll(queueStatusCache.getDeletedQueueUrls());
+        Collection<QueueInfo> queueInfoWithCache = new ArrayList<>(apiQueues.values());
+        queueInfoWithCache.addAll(queueStatusCache.getCreatingQueues());
+        return queueInfoWithCache;
     }
 
     @Override
@@ -149,12 +151,10 @@ public class QueueManagerImpl implements QueueManager {
         generatedIdEntityInitializer.initEntity(queueAttributes);
 
         QueueInfo queueInfo = dataManager.create(QueueInfo.class);
-
         queueInfo.setName(createQueueRequest.getQueueName());
         queueInfo.setType(QueueInfoUtils.getTypeByName(createQueueRequest.getQueueName()));
         queueInfo.setQueueAttributes(queueAttributes);
         queueInfo.setStatus(QueueStatus.CREATING);
-
         return queueInfo;
     }
 
