@@ -31,8 +31,8 @@ public class QueueProperties {
     protected String region;
     protected String queuePrefix;
 
-    public QueueProperties(String accessKey,
-                           String secretKey,
+    public QueueProperties(@Nullable String accessKey,
+                           @Nullable String secretKey,
                            @Nullable String region,
                            @DefaultValue("") String queuePrefix) {
         this.accessKey = accessKey;
