@@ -1,32 +1,19 @@
-package queue_beans;
+package awsqueue_components;
 
-import io.jmix.autoconfigure.awsqueue.QueueAutoConfiguration;
+import awsqueue_components.data.QueueInfoGenerator;
 import io.jmix.awsqueue.QueueStatusCache;
 import io.jmix.awsqueue.entity.QueueInfo;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import queue_beans.data.QueueInfoGenerator;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class QueueStatusCacheTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(DataSourceAutoConfiguration.class,
-                    QueueAutoConfiguration.class,
-                    CacheAutoConfiguration.class))
-            .withPropertyValues("spring.datasource.url=jdbc:hsqldb:mem:testdb", "spring.datasource.username=sa")
-            .withPropertyValues(
-                    "jmix.awsqueue.region=eu-central-1",
-                    "jmix.awsqueue.access-key=mockAccessKey",
-                    "jmix.awsqueue.secret-key=mockSecretKey",
-                    "jmix.awsqueue.queue-prefix=jmixTestPrefix"
-            )
-            .withAllowBeanDefinitionOverriding(true);
+            .withBean(QueueStatusCache.class);
     private final QueueInfoGenerator queueInfoGenerator = new QueueInfoGenerator();
 
     @Test
@@ -37,8 +24,8 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
-            assertThat(cacheBean.getCreatingQueues()).isEmpty();
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
+            Assertions.assertThat(cacheBean.getCreatingQueues()).isEmpty();
         });
     }
 
@@ -51,7 +38,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getCreatingQueues()).isEmpty();
+            Assertions.assertThat(cacheBean.getCreatingQueues()).isEmpty();
         });
     }
 
@@ -65,7 +52,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getCreatingQueues()).hasSize(1);
+            Assertions.assertThat(cacheBean.getCreatingQueues()).hasSize(1);
         });
     }
 
@@ -80,8 +67,8 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getCreatingQueues()).hasSize(notCreated.size());
-            assertThat(cacheBean.getCreatingQueues()).containsAll(notCreated.values());
+            Assertions.assertThat(cacheBean.getCreatingQueues()).hasSize(notCreated.size());
+            Assertions.assertThat(cacheBean.getCreatingQueues()).containsAll(notCreated.values());
         });
     }
 
@@ -94,7 +81,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size());
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size());
         });
     }
 
@@ -108,7 +95,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
         });
     }
 
@@ -122,7 +109,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
         });
     }
 
@@ -136,7 +123,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size());
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size());
         });
     }
 
@@ -147,11 +134,11 @@ public class QueueStatusCacheTest {
             Map<String, QueueInfo> testData = queueInfoGenerator.generate(0, 100);
             testData.keySet().forEach(cacheBean::setDeleting);
             cacheBean.setDeleting("NotLoadedQueue");
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size() + 1);
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size() + 1);
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size());
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(testData.size());
         });
     }
 
@@ -166,7 +153,7 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(fullSizeOfApi - 50);
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(fullSizeOfApi - 50);
         });
     }
 
@@ -184,8 +171,8 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(deleted.size());
-            assertThat(cacheBean.getCreatingQueues()).hasSize(created.size());
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(deleted.size());
+            Assertions.assertThat(cacheBean.getCreatingQueues()).hasSize(created.size());
         });
     }
 
@@ -202,8 +189,8 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
-            assertThat(cacheBean.getCreatingQueues()).hasSize(created.size());
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
+            Assertions.assertThat(cacheBean.getCreatingQueues()).hasSize(created.size());
         });
     }
 
@@ -222,8 +209,8 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).hasSize(deleted.size());
-            assertThat(cacheBean.getCreatingQueues()).isEmpty();
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).hasSize(deleted.size());
+            Assertions.assertThat(cacheBean.getCreatingQueues()).isEmpty();
         });
     }
 
@@ -241,8 +228,8 @@ public class QueueStatusCacheTest {
 
             cacheBean.invalidate(testData);
 
-            assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
-            assertThat(cacheBean.getCreatingQueues()).isEmpty();
+            Assertions.assertThat(cacheBean.getDeletedQueueUrls()).isEmpty();
+            Assertions.assertThat(cacheBean.getCreatingQueues()).isEmpty();
         });
     }
 }

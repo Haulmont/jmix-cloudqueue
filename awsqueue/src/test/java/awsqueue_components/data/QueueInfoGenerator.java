@@ -1,7 +1,6 @@
-package queue_beans.data;
+package awsqueue_components.data;
 
 import io.jmix.awsqueue.entity.QueueInfo;
-import io.jmix.awsqueue.entity.QueueStatus;
 
 import java.util.HashMap;
 import java.util.Map;

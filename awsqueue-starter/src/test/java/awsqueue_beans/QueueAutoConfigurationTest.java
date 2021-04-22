@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package queue_beans;
+package awsqueue_beans;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
@@ -23,25 +23,19 @@ import io.jmix.awsqueue.QueueProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueueAutoConfigurationTest {
-    //https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.3-Release-Notes#applicationcontextrunner-disables-bean-overriding-by-default
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(DataSourceAutoConfiguration.class,
-                    QueueAutoConfiguration.class,
-                    CacheAutoConfiguration.class))
-            .withPropertyValues("spring.datasource.url=jdbc:hsqldb:mem:testdb", "spring.datasource.username=sa")
+            .withConfiguration(AutoConfigurations.of(QueueAutoConfiguration.class, CacheAutoConfiguration.class))
             .withPropertyValues(
                     "jmix.awsqueue.region=eu-central-1",
                     "jmix.awsqueue.access-key=mockAccessKey",
                     "jmix.awsqueue.secret-key=mockSecretKey",
                     "jmix.awsqueue.queue-prefix=jmixTestPrefix"
-            )
-            .withAllowBeanDefinitionOverriding(true);
+            );
 
     @Test
     public void testQueueBeansDefinedByNameOk() {
