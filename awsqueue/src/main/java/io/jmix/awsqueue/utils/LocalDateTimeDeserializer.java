@@ -28,6 +28,6 @@ import java.time.ZoneId;
 public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
     @Override
     public LocalDateTime deserialize(JsonParser currentNode, DeserializationContext ctx) throws IOException {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(currentNode.getValueAsLong() * 1000), ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(currentNode.getValueAsLong()), ZoneId.systemDefault());
     }
 }

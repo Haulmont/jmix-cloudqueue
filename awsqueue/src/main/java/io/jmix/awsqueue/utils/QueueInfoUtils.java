@@ -26,7 +26,7 @@ public final class QueueInfoUtils {
     }
 
     public static QueueType getTypeByName(String name) {
-        if (name.endsWith(".fifo")) {
+        if (name.endsWith(FIFO_POSTFIX)) {
             return QueueType.FIFO;
         }
         return QueueType.STANDARD;
