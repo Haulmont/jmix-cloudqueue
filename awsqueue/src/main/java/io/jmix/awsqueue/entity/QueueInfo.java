@@ -51,6 +51,9 @@ public class QueueInfo {
     @JmixProperty(mandatory = true)
     private String type;
 
+    // todo remove JmixProperty when enum's naming supported
+    @SuppressWarnings("JmixRedundantAnnotation")
+    @JmixProperty
     private String status;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
