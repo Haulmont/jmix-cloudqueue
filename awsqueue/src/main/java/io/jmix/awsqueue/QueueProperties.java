@@ -38,7 +38,6 @@ public class QueueProperties {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.region = region != null ? region : Regions.DEFAULT_REGION.getName();
-
         this.queuePrefix = queuePrefix;
     }
 

@@ -24,21 +24,17 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cloud.aws.messaging.config.annotation.EnableSqs;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 
 @Configuration
 @ComponentScan
 @ConfigurationPropertiesScan
 @JmixModule(dependsOn = {CoreConfiguration.class})
-@EnableSqs
 public class QueueConfiguration {
 
     @Autowired
@@ -50,8 +46,6 @@ public class QueueConfiguration {
     }
 
     @Bean
-    @Primary
-    @ConditionalOnMissingBean(name = "awsqueue_AmazonSQSAsyncClient")
     public AmazonSQSAsyncClient amazonSQSAsyncClient() {
         if (queueProperties.getAccessKey() != null && queueProperties.getSecretKey() != null) {
             return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder

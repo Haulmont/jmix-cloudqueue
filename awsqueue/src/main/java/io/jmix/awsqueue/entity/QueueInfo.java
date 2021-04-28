@@ -31,7 +31,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JmixEntity(annotatedPropertiesOnly = true)
+@JmixEntity
 public class QueueInfo {
     @JmixGeneratedValue
     @JmixProperty(mandatory = true)
@@ -39,7 +39,6 @@ public class QueueInfo {
     private UUID id;
 
     @JsonUnwrapped
-    @JmixProperty
     private QueueAttributes queueAttributes;
 
     @InstanceName
@@ -50,31 +49,25 @@ public class QueueInfo {
     private String url;
 
     @JmixProperty(mandatory = true)
-    private Integer type;
+    private String type;
 
-    @JmixProperty
-    private Integer status;
+    private String status;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonProperty("CreatedTimestamp")
-    @JmixProperty
     private LocalDateTime created;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonProperty("LastModifiedTimestamp")
-    @JmixProperty
     private LocalDateTime lastUpdate;
 
     @JsonProperty("ApproximateNumberOfMessages")
-    @JmixProperty
     private Long messagesAvailable;
 
     @JsonProperty("ApproximateNumberOfMessagesNotVisible")
-    @JmixProperty
     private Long messagesInFlight;
 
     @JsonProperty("ApproximateNumberOfMessagesDelayed")
-    @JmixProperty
     private Long messageDelayed;
 
     public void setCreated(LocalDateTime created) {

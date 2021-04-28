@@ -17,7 +17,7 @@
 package io.jmix.awsqueueui.screen.queueinfo;
 
 import io.jmix.awsqueue.QueueManager;
-import io.jmix.awsqueue.QueueStatusCache;
+import io.jmix.awsqueue.impl.QueueStatusCache;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueueui.app.QueueInfoDetailsHtmlGenerator;
 import io.jmix.ui.UiComponents;

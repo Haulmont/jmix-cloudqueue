@@ -14,39 +14,26 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.awsqueue.impl;
 
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueStatus;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueStatusCache")
-@Scope(BeanDefinition.SCOPE_SINGLETON)
 public class QueueStatusCache {
-    protected Map<String, QueueInfo> creatingQueues;
-    protected Set<String> deletedQueueUrls;
-
-    @PostConstruct
-    protected void init() {
-        creatingQueues = new ConcurrentHashMap<>();
-        deletedQueueUrls = ConcurrentHashMap.newKeySet();
-    }
+    protected Map<String, QueueInfo> creatingQueues = new ConcurrentHashMap<>();
+    protected Set<String> deletedQueueUrls = ConcurrentHashMap.newKeySet();
 
     public void invalidate(Map<String, QueueInfo> actualData) {
-        creatingQueues.keySet().removeAll(actualData
-                .values()
-                .stream()
+        actualData.values().stream()
                 .map(QueueInfo::getName)
-                .collect(Collectors.toList()));
+                .forEach(creatingQueues::remove);
         deletedQueueUrls.retainAll(actualData.keySet());
     }
 

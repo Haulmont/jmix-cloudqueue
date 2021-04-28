@@ -18,7 +18,7 @@ package io.jmix.awsqueueui.screen.queueinfo;
 
 import io.jmix.awsqueue.QueueManager;
 import io.jmix.awsqueue.QueueProperties;
-import io.jmix.awsqueue.app.CreateQueueRequestBuilder;
+import io.jmix.awsqueue.CreateQueueRequestBuilder;
 import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueType;

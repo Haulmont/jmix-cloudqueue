@@ -38,16 +38,6 @@ public class QueueAutoConfigurationTest {
             );
 
     @Test
-    public void testQueueBeansDefinedByNameOk() {
-        this.contextRunner.run(context -> {
-            final String CLIENT_BEAN_NAME = "amazonSQSAsyncClient";
-            assertThat(context).hasBean(CLIENT_BEAN_NAME);
-            assertThat(context).getBean(CLIENT_BEAN_NAME).isExactlyInstanceOf(AmazonSQSAsyncClient.class);
-            assertThat(context).getBean(CLIENT_BEAN_NAME).isInstanceOf(AmazonSQS.class);
-        });
-    }
-
-    @Test
     public void testQueueBeansDefinedByClassOk() {
         this.contextRunner.run(context -> {
             assertThat(context).getBean(AmazonSQSAsyncClient.class).isExactlyInstanceOf(AmazonSQSAsyncClient.class);

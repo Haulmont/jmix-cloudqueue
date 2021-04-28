@@ -20,23 +20,23 @@ import io.jmix.core.metamodel.datatype.impl.EnumClass;
 
 import javax.annotation.Nullable;
 
-public enum QueueStatus implements EnumClass<Integer> {
+public enum QueueStatus implements EnumClass<String> {
 
-    RUNNING(10),
-    CREATING(20);
+    RUNNING("running"),
+    CREATING("creating");
 
-    private Integer id;
+    private String id;
 
-    QueueStatus(Integer value) {
+    QueueStatus(String value) {
         this.id = value;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
     @Nullable
-    public static QueueStatus fromId(Integer id) {
+    public static QueueStatus fromId(String id) {
         for (QueueStatus at : QueueStatus.values()) {
             if (at.getId().equals(id)) {
                 return at;

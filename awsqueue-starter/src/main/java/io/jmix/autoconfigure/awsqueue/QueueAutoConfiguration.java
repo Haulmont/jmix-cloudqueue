@@ -16,13 +16,13 @@
 
 package io.jmix.autoconfigure.awsqueue;
 
-import io.jmix.core.CoreConfiguration;
 import io.jmix.awsqueue.QueueConfiguration;
+import io.jmix.core.CoreConfiguration;
+import org.springframework.cloud.aws.messaging.config.annotation.SqsConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({CoreConfiguration.class, QueueConfiguration.class})
+@Import({CoreConfiguration.class, QueueConfiguration.class, SqsConfiguration.class})
 public class QueueAutoConfiguration {
-
 }

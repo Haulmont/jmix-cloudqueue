@@ -39,7 +39,7 @@ import java.util.Collections;
         QueueConfiguration.class,
         UiConfiguration.class,
 })
-@PropertySource(name = "io.jmix.awsqueue", value = "classpath:/io/jmix/awsqueueui/module.properties")
+@PropertySource(name = "io.jmix.awsqueueui", value = "classpath:/io/jmix/awsqueueui/module.properties")
 public class QueueUiConfiguration {
 
     @Bean("QueueUiControllers")

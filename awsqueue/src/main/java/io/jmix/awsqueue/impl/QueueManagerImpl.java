@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.awsqueue.impl;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
@@ -23,7 +23,8 @@ import com.amazonaws.services.sqs.model.GetQueueAttributesResult;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import io.jmix.awsqueue.QueueManager;
+import io.jmix.awsqueue.QueueProperties;
 import io.jmix.awsqueue.entity.QueueAttributes;
 import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.awsqueue.entity.QueueStatus;
@@ -35,11 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueManagerImpl")
@@ -53,26 +54,12 @@ public class QueueManagerImpl implements QueueManager {
     @Autowired
     protected GeneratedIdEntityInitializer generatedIdEntityInitializer;
     @Autowired
-    private DataManager dataManager;
+    protected DataManager dataManager;
 
     protected ObjectMapper mapper;
 
-    @PostConstruct
-    protected void init() {
-        mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-
-    }
-
-    public Map<String, QueueInfo> loadFromApi() {
-        return amazonSQSAsyncClient
-                .listQueues(queueProperties.getQueuePrefix())
-                .getQueueUrls()
-                .stream()
-                .map(this::queueInfoFromUrl)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(QueueInfo::getUrl, queueInfo -> queueInfo));
+    public QueueManagerImpl() {
+        mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
@@ -83,6 +70,16 @@ public class QueueManagerImpl implements QueueManager {
         Collection<QueueInfo> queueInfoWithCache = new ArrayList<>(apiQueues.values());
         queueInfoWithCache.addAll(queueStatusCache.getCreatingQueues());
         return queueInfoWithCache;
+    }
+
+    private Map<String, QueueInfo> loadFromApi() {
+        return amazonSQSAsyncClient
+                .listQueues(queueProperties.getQueuePrefix())
+                .getQueueUrls()
+                .stream()
+                .map(this::queueInfoFromUrl)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(QueueInfo::getUrl, Function.identity()));
     }
 
     @Override
