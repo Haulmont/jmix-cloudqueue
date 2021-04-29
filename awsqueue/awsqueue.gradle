@@ -26,7 +26,7 @@ dependencies {
 
     api 'org.springframework:spring-tx'
     api 'io.jmix.core:jmix-core'
-    api 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
+    api 'org.springframework.cloud:spring-cloud-aws-messaging'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
