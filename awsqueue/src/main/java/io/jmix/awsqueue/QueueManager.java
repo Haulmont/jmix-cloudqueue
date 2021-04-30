@@ -23,16 +23,17 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
- * AWS Queues CRUD manager
+ * AWS Queues manager for loading information about existing queues, creating and deleting queues.
  */
 public interface QueueManager {
     /**
-     * @return All existing for application queues
+     * @return all existing for application queues
      */
     Collection<QueueInfo> loadAll();
 
     /**
-     * @param queueUrl Url to physical queue in AWS
+     * Gets information about queue in AWS from specified url.
+     * @param queueUrl url to physical queue in AWS
      * @return {@link io.jmix.awsqueue.entity.QueueInfo} with status attributes,
      * returns null if queue does not exist or if it in the process of deleting
      * @see <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SetQueueAttributes.html">Queue attributes</a>
@@ -41,7 +42,7 @@ public interface QueueManager {
     QueueInfo queueInfoFromUrl(String queueUrl);
 
     /**
-     * Create queue on AWS with request specified properties
+     * Create queue on AWS with request specified properties.
      * @param createQueueRequest request with information about new queue,
      * must contains queueName parameter
      * @apiNote use {@link CreateQueueRequestBuilder} to create the request properly
@@ -50,7 +51,7 @@ public interface QueueManager {
     void createQueue(CreateQueueRequest createQueueRequest);
 
     /**
-     * Delete queue from AWS
+     * Delete queue from AWS.
      * @param queueUrl url to physical queue in cloud
      */
     void deleteQueue(String queueUrl);

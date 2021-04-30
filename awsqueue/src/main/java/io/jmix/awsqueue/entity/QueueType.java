@@ -22,8 +22,8 @@ import javax.annotation.Nullable;
 
 public enum QueueType implements EnumClass<String> {
 
-    STANDARD("standard"),
-    FIFO("fifo");
+    STANDARD("S"),
+    FIFO("F");
 
     private final String id;
 

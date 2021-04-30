@@ -21,7 +21,8 @@ import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
- * @param <T> - the message payload type
+ * Customized {@link org.springframework.messaging.support.MessageBuilder} for FIFO/standard queue types.
+ * @param <T> the message payload type
  */
 public class QueueMessageBuilder<T> {
     private static final String MESSAGE_GROUP_ID_KEY = "message-group-id";
@@ -38,24 +39,17 @@ public class QueueMessageBuilder<T> {
     }
 
     /**
-     * @return Spring message builder for payload that was specified
+     * @return {@link org.springframework.messaging.support.MessageBuilder} for payload
      */
     public MessageBuilder<T> standard() {
         return messageBuilder;
     }
 
     /**
-     * Special message builder for FIFO queue with required attributes
-     *
-     * @param messageGroupId         The tag that specifies that a message belongs to a specific message group.
-     *                               Messages that belong to the same message group are always processed one by one,
-     *                               in a strict order relative to the message group (however, messages that belong
-     *                               to different message groups might be processed out of order).
-     * @param messageDeduplicationId The token used for deduplication of sent messages.
-     *                               If a message with a particular message deduplication ID is sent successfully,
-     *                               any messages sent with the same message deduplication ID are accepted successfully
-     *                               but aren't delivered during the 5-minute deduplication interval.
-     * @return Spring message builder for payload that was specified with arguments for FIFO queue
+     * {@link org.springframework.messaging.support.MessageBuilder} with FIFO queue required attributes.
+     * @param messageGroupId the tag that specifies that a message belongs to a specific message group
+     * @param messageDeduplicationId the token used for deduplication of sent messages
+     * @return spring message builder for payload that was specified with arguments for FIFO queue
      * @see <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html">
      * AWS fifo queue
      * </a>
@@ -73,7 +67,6 @@ public class QueueMessageBuilder<T> {
      * <p>If the provided message is an {@link ErrorMessage}, the
      * {@link ErrorMessage#getOriginalMessage() originalMessage} it contains, will be
      * passed on to new instance.
-     *
      * @param message the Message from which the payload and all headers will be copied
      */
     public static <T> QueueMessageBuilder<T> fromMessage(Message<T> message) {
@@ -82,7 +75,6 @@ public class QueueMessageBuilder<T> {
 
     /**
      * Create a new builder for a message with the given payload.
-     *
      * @param payload the payload
      */
     public static <T> QueueMessageBuilder<T> fromPayload(T payload) {

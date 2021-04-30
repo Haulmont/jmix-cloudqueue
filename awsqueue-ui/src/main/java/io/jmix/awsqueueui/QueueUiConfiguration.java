@@ -34,15 +34,11 @@ import java.util.Collections;
 @Configuration
 @ComponentScan
 @ConfigurationPropertiesScan
-@JmixModule(dependsOn = {
-        CoreConfiguration.class,
-        QueueConfiguration.class,
-        UiConfiguration.class,
-})
+@JmixModule(dependsOn = {CoreConfiguration.class, QueueConfiguration.class, UiConfiguration.class})
 @PropertySource(name = "io.jmix.awsqueueui", value = "classpath:/io/jmix/awsqueueui/module.properties")
 public class QueueUiConfiguration {
 
-    @Bean("QueueUiControllers")
+    @Bean("awsqueue_QueueUiControllers")
     public UiControllersConfiguration screens(ApplicationContext applicationContext,
                                               AnnotationScanMetadataReaderFactory metadataReaderFactory) {
         UiControllersConfiguration uiControllers

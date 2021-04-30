@@ -22,8 +22,8 @@ import javax.annotation.Nullable;
 
 public enum QueueStatus implements EnumClass<String> {
 
-    RUNNING("running"),
-    CREATING("creating");
+    RUNNING("R"),
+    CREATING("C");
 
     private String id;
 
