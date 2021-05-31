@@ -16,8 +16,8 @@
 
 package io.jmix.awsqueueui.app;
 
-import io.jmix.awsqueue.entity.QueueInfo;
 import io.jmix.core.Messages;
+import io.jmix.queue.entity.QueueInfo;
 import io.jmix.ui.screen.MessageBundle;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

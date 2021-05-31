@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.impl;
+package io.jmix.queue.utils;
 
-import io.jmix.awsqueue.entity.QueueInfo;
-import io.jmix.awsqueue.entity.QueueStatus;
+import io.jmix.queue.entity.QueueInfo;
+import io.jmix.queue.entity.QueueStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;

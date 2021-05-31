@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.entity;
+package io.jmix.queue.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.jmix.awsqueue.utils.LocalDateTimeDeserializer;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.queue.utils.LocalDateTimeDeserializer;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -53,7 +53,6 @@ public class QueueInfo {
 
     // todo remove JmixProperty when enum's naming supported
     @SuppressWarnings("JmixRedundantAnnotation")
-    @JmixProperty
     private String status;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)

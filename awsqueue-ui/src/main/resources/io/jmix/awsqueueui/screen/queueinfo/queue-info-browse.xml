@@ -20,7 +20,7 @@
         caption="msg://queueInfoBrowse.caption"
         focusComponent="queueInfoDataGrid">
     <data readOnly="true">
-        <collection id="queueInfoDc" class="io.jmix.awsqueue.entity.QueueInfo"/>
+        <collection id="queueInfoDc" class="io.jmix.queue.entity.QueueInfo"/>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>

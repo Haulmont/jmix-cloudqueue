@@ -23,9 +23,9 @@ archivesBaseName = 'jmix-awsqueue'
 dependencies {
 
     api platform("io.jmix.bom:jmix-bom:$bomVersion")
+    api project(':queue-api')
 
     api 'org.springframework:spring-tx'
-    api 'io.jmix.core:jmix-core'
     api 'org.springframework.cloud:spring-cloud-aws-messaging'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

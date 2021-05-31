@@ -16,13 +16,13 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
-import io.jmix.awsqueue.QueueManager;
 import io.jmix.awsqueue.QueueProperties;
-import io.jmix.awsqueue.CreateQueueRequestBuilder;
-import io.jmix.awsqueue.entity.QueueAttributes;
-import io.jmix.awsqueue.entity.QueueInfo;
-import io.jmix.awsqueue.entity.QueueType;
-import io.jmix.awsqueue.utils.QueueInfoUtils;
+import io.jmix.queue.api.QueueManager;
+import io.jmix.queue.entity.QueueAttributes;
+import io.jmix.queue.entity.QueueInfo;
+import io.jmix.queue.entity.QueueType;
+import io.jmix.queue.models.Queue;
+import io.jmix.queue.utils.QueueInfoUtils;
 import io.jmix.core.Metadata;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
@@ -58,14 +58,21 @@ public class QueueInfoEdit extends StandardEditor<QueueInfo> {
         QueueInfo queueInfo = getEditedEntity();
         QueueAttributes attributes = queueInfo.getQueueAttributes();
 
-        queueManager.createQueue(new CreateQueueRequestBuilder(queueInfo.getName())
-                .fromQueueType(queueInfo.getType())
+        queueManager.createQueue(new Queue.Builder(queueInfo.getName())
+                .withQueueType(queueInfo.getType())
                 .withDeliveryTime(attributes.getDeliveryTime())
                 .withMaximumMessageSize(attributes.getMaximumMessageSize())
                 .withMessageRetentionPeriod(attributes.getMessageRetentionPeriod())
                 .withVisibilityTimeout(attributes.getVisibilityTimeout())
                 .withReceiveMessageWaitTime(attributes.getReceiveMessageWaitTime())
                 .build());
+//        queueManager.createQueue(new CreateQueueRequestBuilderAWSImpl(queueInfo.getName())
+//                .fromQueueType(queueInfo.getType())
+//                .withDeliveryTime(attributes.getDeliveryTime())
+//                .withMaximumMessageSize(attributes.getMaximumMessageSize())
+//                .withMessageRetentionPeriod(attributes.getMessageRetentionPeriod())
+//                .withVisibilityTimeout(attributes.getVisibilityTimeout())
+//                .withReceiveMessageWaitTime(attributes.getReceiveMessageWaitTime()));
     }
 
     @Subscribe("nameField")

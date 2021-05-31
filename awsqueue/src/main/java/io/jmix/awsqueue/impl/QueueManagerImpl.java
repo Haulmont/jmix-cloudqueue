@@ -17,36 +17,42 @@
 package io.jmix.awsqueue.impl;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
-import com.amazonaws.services.sqs.model.CreateQueueRequest;
-import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
-import com.amazonaws.services.sqs.model.GetQueueAttributesResult;
-import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
+import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jmix.awsqueue.QueueManager;
+import io.jmix.awsqueue.QueueMessageBuilder;
 import io.jmix.awsqueue.QueueProperties;
-import io.jmix.awsqueue.entity.QueueAttributes;
-import io.jmix.awsqueue.entity.QueueInfo;
-import io.jmix.awsqueue.entity.QueueStatus;
-import io.jmix.awsqueue.entity.QueueType;
-import io.jmix.awsqueue.utils.QueueInfoUtils;
+import io.jmix.queue.entity.QueueAttributes;
+import io.jmix.queue.entity.QueueInfo;
+import io.jmix.queue.entity.QueueStatus;
+import io.jmix.queue.entity.QueueType;
+import io.jmix.awsqueue.utils.DTOMapper;
+import io.jmix.queue.utils.QueueInfoUtils;
 import io.jmix.core.DataManager;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
+import io.jmix.queue.api.MessageQueueHandler;
+import io.jmix.queue.api.QueueManager;
+import io.jmix.queue.utils.QueueStatusCache;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component("awsqueue_QueueManagerImpl")
 public class QueueManagerImpl implements QueueManager {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(QueueManagerImpl.class);
     @Autowired
     protected AmazonSQSAsyncClient amazonSQSAsyncClient;
+    @Autowired
+    private QueueMessagingTemplate queueMessagingTemplate;
     @Autowired
     protected QueueStatusCache queueStatusCache;
     @Autowired
@@ -58,8 +64,20 @@ public class QueueManagerImpl implements QueueManager {
 
     protected ObjectMapper mapper;
 
-    public QueueManagerImpl() {
+    private final Map<String, List<MessageQueueHandler>> queuesHandlers = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService executorService;
+    private final ReceiveMessageRequest receiveRequest;
+
+    public QueueManagerImpl(@Value("${jmix.awsqueue.listener.thread-pool-core-size:5}") int threadPoolCoreSize,
+                            @Value("${jmix.awsqueue.listener.long-polling-timeout:10000}") int longPollingTimeout,
+                            @Value("${jmix.awsqueue.listener.waiting-time-receive-request:5}") int waitingTimeReceiveRequest,
+                            @Value("${jmix.awsqueue.listener.max-number-of-messages:10}") int maxNumberOfMessages) {
         mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        executorService = Executors.newScheduledThreadPool(threadPoolCoreSize);
+        executorService.scheduleAtFixedRate(this::handleMessagesFromQueues, longPollingTimeout, longPollingTimeout, TimeUnit.MILLISECONDS);
+        receiveRequest = new ReceiveMessageRequest()
+                .withWaitTimeSeconds(waitingTimeReceiveRequest)
+                .withMaxNumberOfMessages(maxNumberOfMessages);
     }
 
     @Override
@@ -70,6 +88,60 @@ public class QueueManagerImpl implements QueueManager {
         Collection<QueueInfo> queueInfoWithCache = new ArrayList<>(apiQueues.values());
         queueInfoWithCache.addAll(queueStatusCache.getCreatingQueues());
         return queueInfoWithCache;
+    }
+
+
+    @Override
+    public void subscribe(String queueName, MessageQueueHandler lambdaHandler) {
+        queuesHandlers.computeIfPresent(queueName, (queue, messageQueueHandlers) -> {
+            messageQueueHandlers.add(lambdaHandler);
+            return messageQueueHandlers;
+        });
+        queuesHandlers.computeIfAbsent(queueName, queue -> {
+            List<MessageQueueHandler> handlers = new ArrayList<>();
+            handlers.add(lambdaHandler);
+            return handlers;
+        });
+    }
+
+    @Override
+    public void sendMessageToStandardQueue(String queueName, String payload) {
+        MessageBuilder<String> messageBuilder = QueueMessageBuilder
+                .fromPayload(payload)
+                .standard();
+        queueMessagingTemplate.send(queueName, messageBuilder.build());
+    }
+
+    @Override
+    public void sendMessageToFIFOQueue(String queueName, String payload, String messageGroupId, String messageDeduplicationId) {
+        MessageBuilder<String> messageBuilder = QueueMessageBuilder
+                .fromPayload(payload)
+                .fifo(messageGroupId, messageDeduplicationId);
+        queueMessagingTemplate.send(queueName, messageBuilder.build());
+    }
+
+    private void handleMessagesFromQueues() {
+        try {
+            if (!queuesHandlers.isEmpty())
+                queuesHandlers.forEach((queue, handlers) -> {
+                    if (!handlers.isEmpty()) {
+                        receiveRequest.setQueueUrl(queue);
+                        ReceiveMessageResult result = amazonSQSAsyncClient.receiveMessage(receiveRequest);
+
+                        if (!result.getMessages().isEmpty()) {
+                            io.jmix.queue.models.ReceiveMessageResult res = DTOMapper.getModelFromAWSReceiveMessageResult(result);
+                            handlers.forEach(handler -> handler.handle(res));
+
+                            result.getMessages().forEach(message -> {
+                                DeleteMessageRequest deleteMessageRequest = new DeleteMessageRequest(queue, message.getReceiptHandle());
+                                amazonSQSAsyncClient.deleteMessage(deleteMessageRequest);
+                            });
+                        }
+                    }
+                });
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
     }
 
     private Map<String, QueueInfo> loadFromApi() {
@@ -128,8 +200,13 @@ public class QueueManagerImpl implements QueueManager {
         return arnValues[arnValues.length - 1];
     }
 
+
     @Override
-    public void createQueue(CreateQueueRequest createQueueRequest) {
+    public void createQueue(io.jmix.queue.models.Queue queue) {
+        createQueue(DTOMapper.getCreateQueueRequestFromModel(queue));
+    }
+
+    private void createQueue(CreateQueueRequest createQueueRequest) {
         setPhysicalNameIfNotValid(createQueueRequest);
         amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
         queueStatusCache.setCreating(queueInfoFromRequest(createQueueRequest));
@@ -159,5 +236,6 @@ public class QueueManagerImpl implements QueueManager {
     public void deleteQueue(String queueUrl) {
         amazonSQSAsyncClient.deleteQueueAsync(queueUrl);
         queueStatusCache.setDeleting(queueUrl);
+        queuesHandlers.remove(queueUrl);
     }
 }

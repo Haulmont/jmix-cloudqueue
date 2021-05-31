@@ -31,3 +31,17 @@ Add AWS family queues tag to use only tagged to restrict queues in your applicat
 jmix.awsqueue.queue-prefix = jmixqueues
 ```
 After this ADD-on will create and load only 'jmixqueues' tagged queues.
+
+
+Specify next parameters for SQS Listener in `application.properties`:
+1. long-polling-timeout - the duration (in milliseconds) after that will be sent new request to aws to check new messages.
+2. waiting-time-receive-request - the duration (in seconds) for which the call waits for a message to arrive in the queue before returning. If a message is available, the call returns sooner than WaitTimeSeconds. If no messages are available and the wait time expires, the call returns successfully with an empty list of messages.
+3. max-number-of-messages - the maximum number of messages to return. Amazon SQS never returns more messages than this value (however, fewer messages might be returned). Valid values: 1 to 10.
+4. thread-pool-core-size - the number of threads to keep in the pool, even if they are idle. Use in thread pool that serves for handling messages.
+
+```
+jmix.awsqueue.listener.long-polling-timeout = 10000
+jmix.awsqueue.listener.waiting-time-receive-request = 5
+jmix.awsqueue.listener.max-number-of-messages = 10
+jmix.awsqueue.listener.thread-pool-core-size = 5
+```

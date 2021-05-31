@@ -1,7 +1,7 @@
-package io.jmix.awsqueue.utils;
+package io.jmix.queue.utils;
 
 import com.google.common.base.Strings;
-import io.jmix.awsqueue.entity.QueueType;
+import io.jmix.queue.entity.QueueType;
 
 public final class QueueInfoUtils {
     private static final String FIFO_POSTFIX = ".fifo";

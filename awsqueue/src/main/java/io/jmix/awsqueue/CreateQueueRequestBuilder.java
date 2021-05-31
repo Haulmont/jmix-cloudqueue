@@ -17,7 +17,7 @@
 package io.jmix.awsqueue;
 
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
-import io.jmix.awsqueue.entity.QueueType;
+import io.jmix.queue.entity.QueueType;
 
 
 /**

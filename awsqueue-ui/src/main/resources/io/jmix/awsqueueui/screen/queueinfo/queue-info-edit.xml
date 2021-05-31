@@ -20,7 +20,7 @@
         focusComponent="form">
     <data>
         <instance id="queueInfoDc"
-                  class="io.jmix.awsqueue.entity.QueueInfo">
+                  class="io.jmix.queue.entity.QueueInfo">
         </instance>
     </data>
     <facets>

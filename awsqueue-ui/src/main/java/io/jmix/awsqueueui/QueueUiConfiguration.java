@@ -20,6 +20,7 @@ import io.jmix.awsqueue.QueueConfiguration;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;
 import io.jmix.core.impl.scanning.AnnotationScanMetadataReaderFactory;
+import io.jmix.queue.QueueAPIConfiguration;
 import io.jmix.ui.UiConfiguration;
 import io.jmix.ui.sys.UiControllersConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -34,7 +35,7 @@ import java.util.Collections;
 @Configuration
 @ComponentScan
 @ConfigurationPropertiesScan
-@JmixModule(dependsOn = {CoreConfiguration.class, QueueConfiguration.class, UiConfiguration.class})
+@JmixModule(dependsOn = {CoreConfiguration.class, QueueConfiguration.class, UiConfiguration.class, QueueAPIConfiguration.class})
 @PropertySource(name = "io.jmix.awsqueueui", value = "classpath:/io/jmix/awsqueueui/module.properties")
 public class QueueUiConfiguration {
 

@@ -1,6 +1,6 @@
 package awsqueue_components.data;
 
-import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.queue.entity.QueueInfo;
 
 import java.util.HashMap;
 import java.util.Map;

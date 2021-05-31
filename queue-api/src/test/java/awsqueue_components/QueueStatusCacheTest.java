@@ -1,8 +1,8 @@
 package awsqueue_components;
 
 import awsqueue_components.data.QueueInfoGenerator;
-import io.jmix.awsqueue.impl.QueueStatusCache;
-import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.queue.entity.QueueInfo;
+import io.jmix.queue.utils.QueueStatusCache;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

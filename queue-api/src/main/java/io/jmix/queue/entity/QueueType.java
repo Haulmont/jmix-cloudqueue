@@ -14,17 +14,34 @@
  * limitations under the License.
  */
 
-package io.jmix.autoconfigure.awsqueue;
+package io.jmix.queue.entity;
 
-import io.jmix.awsqueue.QueueConfiguration;
-import io.jmix.awsqueueui.QueueUiConfiguration;
-import io.jmix.core.CoreConfiguration;
-import io.jmix.queue.QueueAPIConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import io.jmix.core.metamodel.datatype.impl.EnumClass;
 
-@Configuration
-@Import({CoreConfiguration.class, QueueConfiguration.class, QueueUiConfiguration.class, QueueAPIConfiguration.class})
-public class QueueUiAutoConfiguration {
+import javax.annotation.Nullable;
 
+public enum QueueType implements EnumClass<String> {
+
+    STANDARD("S"),
+    FIFO("F");
+
+    private final String id;
+
+    QueueType(String value) {
+        this.id = value;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Nullable
+    public static QueueType fromId(String id) {
+        for (QueueType at : QueueType.values()) {
+            if (at.getId().equals(id)) {
+                return at;
+            }
+        }
+        return null;
+    }
 }

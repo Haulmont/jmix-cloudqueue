@@ -16,10 +16,10 @@
 
 package io.jmix.awsqueueui.screen.queueinfo;
 
-import io.jmix.awsqueue.QueueManager;
-import io.jmix.awsqueue.impl.QueueStatusCache;
-import io.jmix.awsqueue.entity.QueueInfo;
+import io.jmix.queue.utils.QueueStatusCache;
 import io.jmix.awsqueueui.app.QueueInfoDetailsHtmlGenerator;
+import io.jmix.queue.api.QueueManager;
+import io.jmix.queue.entity.QueueInfo;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;
