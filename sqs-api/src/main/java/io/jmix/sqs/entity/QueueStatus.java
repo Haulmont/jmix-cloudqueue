@@ -14,14 +14,34 @@
  * limitations under the License.
  */
 
-group = 'io.jmix.awsqueue'
-archivesBaseName = 'jmix-awsqueue-starter'
+package io.jmix.sqs.entity;
 
-dependencies {
-    api project(':awsqueue')
-    api project(':sqs-api')
+import io.jmix.core.metamodel.datatype.impl.EnumClass;
 
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+import javax.annotation.Nullable;
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+public enum QueueStatus implements EnumClass<String> {
+
+    RUNNING("R"),
+    CREATING("C");
+
+    private String id;
+
+    QueueStatus(String value) {
+        this.id = value;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Nullable
+    public static QueueStatus fromId(String id) {
+        for (QueueStatus at : QueueStatus.values()) {
+            if (at.getId().equals(id)) {
+                return at;
+            }
+        }
+        return null;
+    }
 }

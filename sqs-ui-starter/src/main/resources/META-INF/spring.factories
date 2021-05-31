@@ -15,4 +15,4 @@
 #
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  io.jmix.autoconfigure.sqs.QueueAutoConfiguration
+  io.jmix.autoconfigure.sqs.QueueUiAutoConfiguration

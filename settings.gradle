@@ -16,11 +16,11 @@
 
 rootProject.name = 'jmix-awsqueue'
 
+include 'sqs-api'
 include 'awsqueue'
 include 'awsqueue-starter'
-include 'awsqueue-ui'
-include 'awsqueue-ui-starter'
-include 'queue-api'
+include 'sqs-ui'
+include 'sqs-ui-starter'
 
 rootProject.children.each { p1 ->
     p1.buildFileName = "${p1.name}.gradle"

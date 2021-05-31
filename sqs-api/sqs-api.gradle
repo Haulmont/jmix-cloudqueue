@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+apply plugin: 'groovy'
+apply plugin: 'io.jmix'
+
 group = 'io.jmix.awsqueue'
-archivesBaseName = 'jmix-awsqueue-starter'
+archivesBaseName = 'jmix-sqs-api'
 
 dependencies {
-    api project(':awsqueue')
-    api project(':sqs-api')
 
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    api platform("io.jmix.bom:jmix-bom:$bomVersion")
+
+    api 'org.springframework:spring-tx'
+    api 'io.jmix.core:jmix-core'
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+    api 'org.springframework:spring-messaging'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

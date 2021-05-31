@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 group = 'io.jmix.awsqueue'
-archivesBaseName = 'jmix-awsqueue-starter'
+archivesBaseName = 'jmix-sqs-ui'
 
 dependencies {
+    api platform("io.jmix.bom:jmix-bom:$bomVersion")
     api project(':awsqueue')
     api project(':sqs-api')
 
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    api 'io.jmix.ui:jmix-ui'
+    api 'io.jmix.ui:jmix-ui-data'
 }

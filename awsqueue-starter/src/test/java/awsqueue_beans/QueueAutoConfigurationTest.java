@@ -18,7 +18,7 @@ package awsqueue_beans;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
-import io.jmix.autoconfigure.awsqueue.QueueAutoConfiguration;
+import io.jmix.autoconfigure.sqs.QueueAutoConfiguration;
 import io.jmix.awsqueue.QueueProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

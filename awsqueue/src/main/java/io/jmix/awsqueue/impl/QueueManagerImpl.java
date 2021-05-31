@@ -20,24 +20,23 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jmix.awsqueue.QueueMessageBuilder;
 import io.jmix.awsqueue.QueueProperties;
-import io.jmix.queue.entity.QueueAttributes;
-import io.jmix.queue.entity.QueueInfo;
-import io.jmix.queue.entity.QueueStatus;
-import io.jmix.queue.entity.QueueType;
+import io.jmix.sqs.entity.QueueAttributes;
+import io.jmix.sqs.entity.QueueInfo;
+import io.jmix.sqs.entity.QueueStatus;
+import io.jmix.sqs.entity.QueueType;
 import io.jmix.awsqueue.utils.DTOMapper;
-import io.jmix.queue.utils.QueueInfoUtils;
+import io.jmix.sqs.utils.QueueInfoUtils;
 import io.jmix.core.DataManager;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
-import io.jmix.queue.api.MessageQueueHandler;
-import io.jmix.queue.api.QueueManager;
-import io.jmix.queue.utils.QueueStatusCache;
+import io.jmix.sqs.api.MessageQueueHandler;
+import io.jmix.sqs.api.QueueManager;
+import io.jmix.sqs.utils.QueueStatusCache;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -46,7 +45,7 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component("awsqueue_QueueManagerImpl")
+@Component("sqs_QueueManagerImpl")
 public class QueueManagerImpl implements QueueManager {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(QueueManagerImpl.class);
     @Autowired
@@ -105,19 +104,8 @@ public class QueueManagerImpl implements QueueManager {
     }
 
     @Override
-    public void sendMessageToStandardQueue(String queueName, String payload) {
-        MessageBuilder<String> messageBuilder = QueueMessageBuilder
-                .fromPayload(payload)
-                .standard();
-        queueMessagingTemplate.send(queueName, messageBuilder.build());
-    }
-
-    @Override
-    public void sendMessageToFIFOQueue(String queueName, String payload, String messageGroupId, String messageDeduplicationId) {
-        MessageBuilder<String> messageBuilder = QueueMessageBuilder
-                .fromPayload(payload)
-                .fifo(messageGroupId, messageDeduplicationId);
-        queueMessagingTemplate.send(queueName, messageBuilder.build());
+    public void sendMessage(String queueName, Message<?> message) {
+        queueMessagingTemplate.send(queueName, message);
     }
 
     private void handleMessagesFromQueues() {
@@ -129,7 +117,7 @@ public class QueueManagerImpl implements QueueManager {
                         ReceiveMessageResult result = amazonSQSAsyncClient.receiveMessage(receiveRequest);
 
                         if (!result.getMessages().isEmpty()) {
-                            io.jmix.queue.models.ReceiveMessageResult res = DTOMapper.getModelFromAWSReceiveMessageResult(result);
+                            io.jmix.sqs.models.ReceiveMessageResult res = DTOMapper.getModelFromAWSReceiveMessageResult(result);
                             handlers.forEach(handler -> handler.handle(res));
 
                             result.getMessages().forEach(message -> {
@@ -202,7 +190,7 @@ public class QueueManagerImpl implements QueueManager {
 
 
     @Override
-    public void createQueue(io.jmix.queue.models.Queue queue) {
+    public void createQueue(io.jmix.sqs.models.Queue queue) {
         createQueue(DTOMapper.getCreateQueueRequestFromModel(queue));
     }
 

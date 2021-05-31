@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-group = 'io.jmix.awsqueue'
-archivesBaseName = 'jmix-awsqueue-starter'
+package io.jmix.autoconfigure.sqs;
 
-dependencies {
-    api project(':awsqueue')
-    api project(':sqs-api')
+import io.jmix.awsqueue.QueueConfiguration;
+import io.jmix.core.CoreConfiguration;
+import io.jmix.sqs.SQSAPIConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+@Configuration
+@Import({CoreConfiguration.class, QueueConfiguration.class, SQSAPIConfiguration.class})
+public class QueueAutoConfiguration {
 }

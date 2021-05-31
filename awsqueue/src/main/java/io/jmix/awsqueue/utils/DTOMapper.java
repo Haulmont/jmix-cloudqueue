@@ -2,9 +2,9 @@ package io.jmix.awsqueue.utils;
 
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import io.jmix.awsqueue.CreateQueueRequestBuilder;
-import io.jmix.queue.models.Message;
-import io.jmix.queue.models.Queue;
-import io.jmix.queue.models.ReceiveMessageResult;
+import io.jmix.sqs.models.Message;
+import io.jmix.sqs.models.Queue;
+import io.jmix.sqs.models.ReceiveMessageResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,8 +47,8 @@ public class DTOMapper {
     }
 
     public static CreateQueueRequest getCreateQueueRequestFromModel(Queue from) {
-        return new CreateQueueRequestBuilder(from.getQueueName())
-                .fromQueueType(from.getQueueType())
+        return new CreateQueueRequestBuilder(from.getName())
+                .fromQueueType(from.getType())
                 .withDeliveryTime(from.getDeliveryTime())
                 .withMaximumMessageSize(from.getMaximumMessageSize())
                 .withMessageRetentionPeriod(from.getMessageRetentionPeriod())
