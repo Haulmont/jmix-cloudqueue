@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-rootProject.name = 'jmix-awsqueue'
+apply plugin: 'groovy'
+apply plugin: 'io.jmix'
 
-include 'simple-queue-api'
-include 'simple-queue-aws-starter'
-include 'simple-queue-yandex-starter'
-include 'simple-queue-ui'
-include 'simple-queue-ui-starter'
+group = 'io.jmix.awsqueue'
+archivesBaseName = 'jmix-simple-queue-api'
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+dependencies {
+
+    api platform("io.jmix.bom:jmix-bom:$bomVersion")
+
+    api 'io.jmix.core:jmix-core'
+
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'com.fasterxml.jackson.core:jackson-databind'
+
+    api 'org.springframework:spring-tx'
+    api 'org.springframework:spring-messaging'
+    api 'org.springframework.cloud:spring-cloud-aws-messaging'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-

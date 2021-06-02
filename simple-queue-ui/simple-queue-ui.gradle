@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+apply plugin: 'io.jmix'
 
-rootProject.name = 'jmix-awsqueue'
+group = 'io.jmix.awsqueue'
+archivesBaseName = 'jmix-simple-queue-ui'
 
-include 'simple-queue-api'
-include 'simple-queue-aws-starter'
-include 'simple-queue-yandex-starter'
-include 'simple-queue-ui'
-include 'simple-queue-ui-starter'
+dependencies {
+    api platform("io.jmix.bom:jmix-bom:$bomVersion")
+    api project(':simple-queue-api')
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+    api 'io.jmix.ui:jmix-ui'
+    api 'io.jmix.ui:jmix-ui-data'
 }
-

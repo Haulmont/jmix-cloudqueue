@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-rootProject.name = 'jmix-awsqueue'
+package io.jmix.autoconfigure.simplequeue;
 
-include 'simple-queue-api'
-include 'simple-queue-aws-starter'
-include 'simple-queue-yandex-starter'
-include 'simple-queue-ui'
-include 'simple-queue-ui-starter'
+import io.jmix.sqsui.QueueUiConfiguration;
+import io.jmix.core.CoreConfiguration;
+import io.jmix.simplequeue.SQSAPIConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+@Configuration
+@Import({CoreConfiguration.class, QueueUiConfiguration.class, SQSAPIConfiguration.class})
+public class QueueUiAutoConfiguration {
+
 }
-

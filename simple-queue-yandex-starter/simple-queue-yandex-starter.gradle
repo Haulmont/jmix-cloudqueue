@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-rootProject.name = 'jmix-awsqueue'
+group = 'io.jmix.awsqueue'
+archivesBaseName = 'jmix-yandex-simple-queue-starter'
 
-include 'simple-queue-api'
-include 'simple-queue-aws-starter'
-include 'simple-queue-yandex-starter'
-include 'simple-queue-ui'
-include 'simple-queue-ui-starter'
+dependencies {
+    api project(':simple-queue-api')
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+    api 'org.springframework.boot:spring-boot-autoconfigure'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-

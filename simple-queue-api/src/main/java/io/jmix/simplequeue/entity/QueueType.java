@@ -14,15 +14,34 @@
  * limitations under the License.
  */
 
-rootProject.name = 'jmix-awsqueue'
+package io.jmix.simplequeue.entity;
 
-include 'simple-queue-api'
-include 'simple-queue-aws-starter'
-include 'simple-queue-yandex-starter'
-include 'simple-queue-ui'
-include 'simple-queue-ui-starter'
+import io.jmix.core.metamodel.datatype.impl.EnumClass;
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+import javax.annotation.Nullable;
+
+public enum QueueType implements EnumClass<String> {
+
+    STANDARD("S"),
+    FIFO("F");
+
+    private final String id;
+
+    QueueType(String value) {
+        this.id = value;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Nullable
+    public static QueueType fromId(String id) {
+        for (QueueType at : QueueType.values()) {
+            if (at.getId().equals(id)) {
+                return at;
+            }
+        }
+        return null;
+    }
 }
-

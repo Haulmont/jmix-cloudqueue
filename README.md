@@ -28,17 +28,17 @@ implementation 'io.jmix.awsqueue:jmix-yandexqueue-starter'
 
 Specify AWS credentials and region in `application.properties`:
 ```
-jmix.sqs.awsqueue.region = eu-central-1
-jmix.sqs.awsqueue.access-key = AWS_ACCESS_KEY
-jmix.sqs.awsqueue.secret-key = AWS_SECRET_KEY
+jmix.sqs.aws.region = eu-central-1
+jmix.sqs.aws.access-key = AWS_ACCESS_KEY
+jmix.sqs.aws.secret-key = AWS_SECRET_KEY
 ```
 
 Specify Yandex credentials, region and endpoint in `application.properties`:
 ```
-jmix.sqs.yandexqueue.region = ru-central1
-jmix.sqs.yandexqueue.access-key = YANDEX_ACCESS_KEY
-jmix.sqs.yandexqueue.secret-key = YANDEX_SECRET_KEY
-jmix.sqs.yandexqueue.endpoint-configuration = https://message-queue.api.cloud.yandex.net
+jmix.sqs.yandex.region = ru-central1
+jmix.sqs.yandex.access-key = YANDEX_ACCESS_KEY
+jmix.sqs.yandex.secret-key = YANDEX_SECRET_KEY
+jmix.sqs.yandex.endpoint-configuration = https://message-queue.api.cloud.yandex.net
 ```
 
 By default, tag is not defined and application loads every queue and
@@ -46,12 +46,12 @@ create queues without any tag
 
 Add AWS family queues tag to use only tagged to restrict queues in your application
 ```
-jmix.sqs.awsqueue.queue-prefix = jmixqueues
+jmix.sqs.aws.queue-prefix = jmixqueues
 ```
 
 Add Yandex family queues tag to use only tagged to restrict queues in your application
 ```
-jmix.sqs.yandexqueue.queue-prefix = jmixqueues
+jmix.sqs.yandex.queue-prefix = jmixqueues
 ```
 
 After this ADD-on will create and load only 'jmixqueues' tagged queues.
