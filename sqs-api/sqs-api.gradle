@@ -24,11 +24,14 @@ dependencies {
 
     api platform("io.jmix.bom:jmix-bom:$bomVersion")
 
-    api 'org.springframework:spring-tx'
     api 'io.jmix.core:jmix-core'
+
     api 'com.fasterxml.jackson.core:jackson-annotations'
     api 'com.fasterxml.jackson.core:jackson-databind'
+
+    api 'org.springframework:spring-tx'
     api 'org.springframework:spring-messaging'
+    api 'org.springframework.cloud:spring-cloud-aws-messaging'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

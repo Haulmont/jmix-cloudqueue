@@ -18,8 +18,8 @@ package awsqueue_beans;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
-import io.jmix.autoconfigure.sqs.QueueAutoConfiguration;
-import io.jmix.awsqueue.QueueProperties;
+import io.jmix.autoconfigure.sqs.QueueAutoConfigurationAWS;
+import io.jmix.autoconfigure.sqs.QueuePropertiesAWS;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
@@ -29,12 +29,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueueAutoConfigurationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(QueueAutoConfiguration.class, CacheAutoConfiguration.class))
+            .withConfiguration(AutoConfigurations.of(QueueAutoConfigurationAWS.class, CacheAutoConfiguration.class))
             .withPropertyValues(
-                    "jmix.awsqueue.region=eu-central-1",
-                    "jmix.awsqueue.access-key=mockAccessKey",
-                    "jmix.awsqueue.secret-key=mockSecretKey",
-                    "jmix.awsqueue.queue-prefix=jmixTestPrefix"
+                    "jmix.sqs.awsqueue.region=eu-central-1",
+                    "jmix.sqs.awsqueue.access-key=mockAccessKey",
+                    "jmix.sqs.awsqueue.secret-key=mockSecretKey",
+                    "jmix.sqs.awsqueue.queue-prefix=jmixTestPrefix"
             );
 
     @Test
@@ -48,14 +48,14 @@ public class QueueAutoConfigurationTest {
     @Test
     public void testQueuePropertiesDefined() {
         this.contextRunner.run(context -> {
-            assertThat(context).getBean(QueueProperties.class).isExactlyInstanceOf(QueueProperties.class);
+            assertThat(context).getBean(QueuePropertiesAWS.class).isExactlyInstanceOf(QueuePropertiesAWS.class);
         });
     }
 
     @Test
     public void testQueueHasProperties() {
         this.contextRunner.run(context -> {
-            QueueProperties properties = context.getBean(QueueProperties.class);
+            QueuePropertiesAWS properties = context.getBean(QueuePropertiesAWS.class);
             assertThat(properties).hasFieldOrPropertyWithValue("accessKey", "mockAccessKey");
             assertThat(properties).hasFieldOrPropertyWithValue("secretKey", "mockSecretKey");
             assertThat(properties).hasFieldOrPropertyWithValue("region", "eu-central-1");

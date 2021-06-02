@@ -16,7 +16,6 @@
 
 package io.jmix.sqsui;
 
-import io.jmix.awsqueue.QueueConfiguration;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;
 import io.jmix.core.impl.scanning.AnnotationScanMetadataReaderFactory;
@@ -35,7 +34,7 @@ import java.util.Collections;
 @Configuration
 @ComponentScan
 @ConfigurationPropertiesScan
-@JmixModule(dependsOn = {CoreConfiguration.class, QueueConfiguration.class, UiConfiguration.class, SQSAPIConfiguration.class})
+@JmixModule(dependsOn = {CoreConfiguration.class, UiConfiguration.class, SQSAPIConfiguration.class})
 @PropertySource(name = "io.jmix.sqsui", value = "classpath:/io/jmix/sqsui/module.properties")
 public class QueueUiConfiguration {
 

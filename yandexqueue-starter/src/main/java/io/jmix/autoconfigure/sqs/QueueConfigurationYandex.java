@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.autoconfigure.sqs;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.annotation.JmixModule;
+import io.jmix.sqs.api.QueueProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.aws.messaging.config.annotation.SqsConfiguration;
@@ -38,7 +40,7 @@ import org.springframework.context.annotation.Import;
 @ConfigurationPropertiesScan
 @JmixModule(dependsOn = {CoreConfiguration.class})
 @Import(SqsConfiguration.class)
-public class QueueConfiguration {
+public class QueueConfigurationYandex {
 
     @Autowired
     protected QueueProperties queueProperties;
@@ -50,10 +52,11 @@ public class QueueConfiguration {
 
     @Bean
     public AmazonSQSAsyncClient amazonSQSAsyncClient() {
-        if (queueProperties.getAccessKey() != null && queueProperties.getSecretKey() != null) {
+        if (queueProperties.getAccessKey() != null && queueProperties.getSecretKey() != null
+                && queueProperties.getEndpointConfiguration() != null && queueProperties.getRegion() != null) {
             return (AmazonSQSAsyncClient) AmazonSQSAsyncClientBuilder
                     .standard()
-                    .withRegion(queueProperties.getRegion())
+                    .withEndpointConfiguration(getEndpointConfiguration())
                     .withCredentials(new AWSStaticCredentialsProvider(getBasicAwsCredentials()))
                     .build();
         } else {
@@ -61,7 +64,11 @@ public class QueueConfiguration {
         }
     }
 
-    protected AWSCredentials getBasicAwsCredentials() {
+    private AwsClientBuilder.EndpointConfiguration getEndpointConfiguration() {
+        return new AwsClientBuilder.EndpointConfiguration(queueProperties.getEndpointConfiguration(), queueProperties.getRegion());
+    }
+
+    private AWSCredentials getBasicAwsCredentials() {
         return new BasicAWSCredentials(queueProperties.getAccessKey(), queueProperties.getSecretKey());
     }
 

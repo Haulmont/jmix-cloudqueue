@@ -1,7 +1,6 @@
-package io.jmix.awsqueue.utils;
+package io.jmix.sqs.utils;
 
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
-import io.jmix.awsqueue.CreateQueueRequestBuilder;
 import io.jmix.sqs.models.Message;
 import io.jmix.sqs.models.Queue;
 import io.jmix.sqs.models.ReceiveMessageResult;

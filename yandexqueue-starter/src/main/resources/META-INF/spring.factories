@@ -15,4 +15,4 @@
 #
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  io.jmix.autoconfigure.sqs.QueueAutoConfigurationAWS
+  io.jmix.autoconfigure.sqs.QueueConfigurationYandex

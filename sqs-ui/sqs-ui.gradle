@@ -18,7 +18,6 @@ archivesBaseName = 'jmix-sqs-ui'
 
 dependencies {
     api platform("io.jmix.bom:jmix-bom:$bomVersion")
-    api project(':awsqueue')
     api project(':sqs-api')
 
     api 'io.jmix.ui:jmix-ui'

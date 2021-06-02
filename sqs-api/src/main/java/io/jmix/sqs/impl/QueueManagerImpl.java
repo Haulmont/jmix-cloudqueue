@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue.impl;
+package io.jmix.sqs.impl;
 
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jmix.awsqueue.QueueProperties;
+import io.jmix.sqs.api.QueueProperties;
+import io.jmix.sqs.configuration.ListenerProperties;
 import io.jmix.sqs.entity.QueueAttributes;
 import io.jmix.sqs.entity.QueueInfo;
 import io.jmix.sqs.entity.QueueStatus;
 import io.jmix.sqs.entity.QueueType;
-import io.jmix.awsqueue.utils.DTOMapper;
+import io.jmix.sqs.utils.DTOMapper;
 import io.jmix.sqs.utils.QueueInfoUtils;
 import io.jmix.core.DataManager;
 import io.jmix.core.impl.GeneratedIdEntityInitializer;
@@ -34,8 +35,9 @@ import io.jmix.sqs.api.QueueManager;
 import io.jmix.sqs.utils.QueueStatusCache;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +50,11 @@ import java.util.stream.Collectors;
 @Component("sqs_QueueManagerImpl")
 public class QueueManagerImpl implements QueueManager {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(QueueManagerImpl.class);
+
+    private static final String QUEUE_PARAMETER_ALL = "All";
+    private static final String QUEUE_PARAMETER_QUEUE_ARN = "QueueArn";
+    private static final String QUEUE_PARAMETER_SPLIT_EXP = ":";
+
     @Autowired
     protected AmazonSQSAsyncClient amazonSQSAsyncClient;
     @Autowired
@@ -67,16 +74,21 @@ public class QueueManagerImpl implements QueueManager {
     private final ScheduledExecutorService executorService;
     private final ReceiveMessageRequest receiveRequest;
 
-    public QueueManagerImpl(@Value("${jmix.awsqueue.listener.thread-pool-core-size:5}") int threadPoolCoreSize,
-                            @Value("${jmix.awsqueue.listener.long-polling-timeout:10000}") int longPollingTimeout,
-                            @Value("${jmix.awsqueue.listener.waiting-time-receive-request:5}") int waitingTimeReceiveRequest,
-                            @Value("${jmix.awsqueue.listener.max-number-of-messages:10}") int maxNumberOfMessages) {
+    public QueueManagerImpl(ListenerProperties listenerProperties) {
         mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        executorService = Executors.newScheduledThreadPool(threadPoolCoreSize);
-        executorService.scheduleAtFixedRate(this::handleMessagesFromQueues, longPollingTimeout, longPollingTimeout, TimeUnit.MILLISECONDS);
+        executorService = Executors.newScheduledThreadPool(listenerProperties.getThreadPoolCoreSize());
+        executorService.scheduleAtFixedRate(this::handleMessagesFromQueues,
+                listenerProperties.getLongPollingTimeout(),
+                listenerProperties.getLongPollingTimeout(),
+                TimeUnit.MILLISECONDS);
         receiveRequest = new ReceiveMessageRequest()
-                .withWaitTimeSeconds(waitingTimeReceiveRequest)
-                .withMaxNumberOfMessages(maxNumberOfMessages);
+                .withWaitTimeSeconds(listenerProperties.getWaitingTimeReceiveRequest())
+                .withMaxNumberOfMessages(listenerProperties.getMaxNumberOfMessages());
+    }
+
+    @EventListener
+    public void onApplicationContextClosed(ContextClosedEvent event) {
+        executorService.shutdownNow();
     }
 
     @Override
@@ -89,75 +101,12 @@ public class QueueManagerImpl implements QueueManager {
         return queueInfoWithCache;
     }
 
-
-    @Override
-    public void subscribe(String queueName, MessageQueueHandler lambdaHandler) {
-        queuesHandlers.computeIfPresent(queueName, (queue, messageQueueHandlers) -> {
-            messageQueueHandlers.add(lambdaHandler);
-            return messageQueueHandlers;
-        });
-        queuesHandlers.computeIfAbsent(queueName, queue -> {
-            List<MessageQueueHandler> handlers = new ArrayList<>();
-            handlers.add(lambdaHandler);
-            return handlers;
-        });
-    }
-
-    @Override
-    public void sendMessage(String queueName, Message<?> message) {
-        queueMessagingTemplate.send(queueName, message);
-    }
-
-    private void handleMessagesFromQueues() {
-        try {
-            if (!queuesHandlers.isEmpty())
-                queuesHandlers.forEach((queue, handlers) -> {
-                    if (!handlers.isEmpty()) {
-                        receiveRequest.setQueueUrl(queue);
-                        ReceiveMessageResult result = amazonSQSAsyncClient.receiveMessage(receiveRequest);
-
-                        if (!result.getMessages().isEmpty()) {
-                            io.jmix.sqs.models.ReceiveMessageResult res = DTOMapper.getModelFromAWSReceiveMessageResult(result);
-                            handlers.forEach(handler -> handler.handle(res));
-
-                            result.getMessages().forEach(message -> {
-                                DeleteMessageRequest deleteMessageRequest = new DeleteMessageRequest(queue, message.getReceiptHandle());
-                                amazonSQSAsyncClient.deleteMessage(deleteMessageRequest);
-                            });
-                        }
-                    }
-                });
-        } catch (Exception e) {
-            log.info(e.getMessage());
-        }
-    }
-
-    private Map<String, QueueInfo> loadFromApi() {
-        return amazonSQSAsyncClient
-                .listQueues(queueProperties.getQueuePrefix())
-                .getQueueUrls()
-                .stream()
-                .map(this::queueInfoFromUrl)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(QueueInfo::getUrl, Function.identity()));
-    }
-
     @Override
     @Nullable
     public QueueInfo queueInfoFromUrl(String queueUrl) {
         GetQueueAttributesRequest request = new GetQueueAttributesRequest()
                 .withQueueUrl(queueUrl)
-                .withAttributeNames("QueueArn",
-                        "CreatedTimestamp",
-                        "LastModifiedTimestamp",
-                        "MaximumMessageSize",
-                        "MessageRetentionPeriod",
-                        "VisibilityTimeout",
-                        "ApproximateNumberOfMessages",
-                        "DelaySeconds",
-                        "ApproximateNumberOfMessagesNotVisible",
-                        "ReceiveMessageWaitTimeSeconds",
-                        "ApproximateNumberOfMessagesDelayed");
+                .withAttributeNames(QUEUE_PARAMETER_ALL);
         GetQueueAttributesResult attributesResult;
         try {
             attributesResult = amazonSQSAsyncClient.getQueueAttributes(request);
@@ -176,6 +125,79 @@ public class QueueManagerImpl implements QueueManager {
         return queueInfo;
     }
 
+    @Override
+    public void createQueue(io.jmix.sqs.models.Queue queue) {
+        createQueue(DTOMapper.getCreateQueueRequestFromModel(queue));
+    }
+
+    @Override
+    public void deleteQueue(String queueUrl) {
+        amazonSQSAsyncClient.deleteQueueAsync(queueUrl);
+        queueStatusCache.setDeleting(queueUrl);
+        queuesHandlers.remove(queueUrl);
+    }
+
+    @Override
+    public void subscribe(String queueName, MessageQueueHandler lambdaHandler) {
+        String queueUrl = getQueueUrlByName(queueName);
+
+        queuesHandlers.computeIfPresent(queueUrl, (queue, messageQueueHandlers) -> {
+            messageQueueHandlers.add(lambdaHandler);
+            return messageQueueHandlers;
+        });
+        queuesHandlers.computeIfAbsent(queueUrl, queue -> {
+            List<MessageQueueHandler> handlers = new ArrayList<>();
+            handlers.add(lambdaHandler);
+            return handlers;
+        });
+    }
+
+    @Override
+    public void sendMessage(String queueName, Message<?> message) {
+        queueMessagingTemplate.send(queueName, message);
+    }
+
+    private String getQueueUrlByName(String name) {
+        String queueUrl = name;
+        Optional<QueueInfo> optionalQueueInfo = loadFromApi().values()
+                .stream()
+                .filter(queueInfo -> queueInfo.getName().equals(name))
+                .findFirst();
+        if (optionalQueueInfo.isPresent()) queueUrl = optionalQueueInfo.get().getUrl();
+        return queueUrl;
+    }
+
+    private void handleMessagesFromQueues() {
+        try {
+            if (!queuesHandlers.isEmpty())
+                queuesHandlers.forEach((queue, handlers) -> {
+                    if (!handlers.isEmpty()) {
+                        receiveRequest.setQueueUrl(queue);
+                        ReceiveMessageResult result = amazonSQSAsyncClient.receiveMessage(receiveRequest);
+
+                        if (!result.getMessages().isEmpty()) {
+                            handlers.forEach(handler ->
+                                    handler.handle(DTOMapper.getModelFromAWSReceiveMessageResult(result)));
+                            result.getMessages().forEach(message ->
+                                    amazonSQSAsyncClient.deleteMessage(new DeleteMessageRequest(queue, message.getReceiptHandle())));
+                        }
+                    }
+                });
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    private Map<String, QueueInfo> loadFromApi() {
+        return amazonSQSAsyncClient
+                .listQueues(queueProperties.getQueuePrefix())
+                .getQueueUrls()
+                .stream()
+                .map(this::queueInfoFromUrl)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(QueueInfo::getUrl, Function.identity()));
+    }
+
     private QueueInfo initQueueInfoFromAttributes(Map<String, String> attr) {
         QueueInfo queueInfo = mapper.convertValue(attr, QueueInfo.class);
         generatedIdEntityInitializer.initEntity(queueInfo);
@@ -184,14 +206,8 @@ public class QueueManagerImpl implements QueueManager {
     }
 
     private String getNameFromAttributes(Map<String, String> attr) {
-        String[] arnValues = attr.get("QueueArn").split(":");
+        String[] arnValues = attr.get(QUEUE_PARAMETER_QUEUE_ARN).split(QUEUE_PARAMETER_SPLIT_EXP);
         return arnValues[arnValues.length - 1];
-    }
-
-
-    @Override
-    public void createQueue(io.jmix.sqs.models.Queue queue) {
-        createQueue(DTOMapper.getCreateQueueRequestFromModel(queue));
     }
 
     private void createQueue(CreateQueueRequest createQueueRequest) {
@@ -218,12 +234,5 @@ public class QueueManagerImpl implements QueueManager {
         queueInfo.setQueueAttributes(queueAttributes);
         queueInfo.setStatus(QueueStatus.CREATING);
         return queueInfo;
-    }
-
-    @Override
-    public void deleteQueue(String queueUrl) {
-        amazonSQSAsyncClient.deleteQueueAsync(queueUrl);
-        queueStatusCache.setDeleting(queueUrl);
-        queuesHandlers.remove(queueUrl);
     }
 }

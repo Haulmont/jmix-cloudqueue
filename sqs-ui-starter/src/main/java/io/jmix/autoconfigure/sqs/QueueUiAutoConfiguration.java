@@ -16,7 +16,6 @@
 
 package io.jmix.autoconfigure.sqs;
 
-import io.jmix.awsqueue.QueueConfiguration;
 import io.jmix.sqsui.QueueUiConfiguration;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.sqs.SQSAPIConfiguration;
@@ -24,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({CoreConfiguration.class, QueueConfiguration.class, QueueUiConfiguration.class, SQSAPIConfiguration.class})
+@Import({CoreConfiguration.class, QueueUiConfiguration.class, SQSAPIConfiguration.class})
 public class QueueUiAutoConfiguration {
 
 }

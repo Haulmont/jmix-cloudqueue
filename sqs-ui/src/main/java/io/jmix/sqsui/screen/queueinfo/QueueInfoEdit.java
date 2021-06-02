@@ -16,8 +16,8 @@
 
 package io.jmix.sqsui.screen.queueinfo;
 
-import io.jmix.awsqueue.QueueProperties;
 import io.jmix.sqs.api.QueueManager;
+import io.jmix.sqs.api.QueueProperties;
 import io.jmix.sqs.entity.QueueAttributes;
 import io.jmix.sqs.entity.QueueInfo;
 import io.jmix.sqs.entity.QueueType;

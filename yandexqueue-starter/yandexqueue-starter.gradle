@@ -18,15 +18,12 @@ apply plugin: 'groovy'
 apply plugin: 'io.jmix'
 
 group = 'io.jmix.awsqueue'
-archivesBaseName = 'jmix-awsqueue'
+archivesBaseName = 'jmix-yandexqueue-starter'
 
 dependencies {
-
-    api platform("io.jmix.bom:jmix-bom:$bomVersion")
     api project(':sqs-api')
 
-    api 'org.springframework:spring-tx'
-    api 'org.springframework.cloud:spring-cloud-aws-messaging'
+    api platform("io.jmix.bom:jmix-bom:$bomVersion")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

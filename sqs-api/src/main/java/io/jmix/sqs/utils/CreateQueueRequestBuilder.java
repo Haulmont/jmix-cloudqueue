@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.sqs.utils;
 
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import io.jmix.sqs.entity.QueueType;
 
 
 /**
- * {@link com.amazonaws.services.sqs.model.CreateQueueRequest} builder that can provide any of SQS queue attributes.
- * @see <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SetQueueAttributes.html">Queue attributes</a>
+ * The builder that can provide any of SQS queue attributes.
  */
 public class CreateQueueRequestBuilder {
     protected final CreateQueueRequest createQueueRequest;
 
     /**
-     * @param queueName physical name of new queue in AWS
+     * @param queueName physical name of new queue in provider
      */
     public CreateQueueRequestBuilder(String queueName) {
         createQueueRequest = new CreateQueueRequest().withQueueName(queueName);
@@ -45,9 +44,7 @@ public class CreateQueueRequestBuilder {
     }
 
     /**
-     * @param maximumMessageSize the limit of how many bytes a message can contain before Amazon SQS rejects it.
-     * Valid values: An integer from 1,024 bytes (1 KiB) up to 262,144 bytes (256 KiB).
-     * Default: 262,144 (256 KiB)
+     * @param maximumMessageSize the limit of how many bytes a message can contain before provider rejects it.
      */
     public CreateQueueRequestBuilder withMaximumMessageSize(Long maximumMessageSize) {
         putIfNotNull("MaximumMessageSize", maximumMessageSize);
@@ -55,9 +52,7 @@ public class CreateQueueRequestBuilder {
     }
 
     /**
-     * @param messageRetentionPeriod the length of time, in seconds, for which Amazon SQS retains a message.
-     * Valid values: An integer representing seconds, from 60 (1 minute) to 1,209,600 (14 days).
-     * Default: 345,600 (4 days)
+     * @param messageRetentionPeriod the length of time, in seconds, for which provider retains a message.
      */
     public CreateQueueRequestBuilder withMessageRetentionPeriod(Long messageRetentionPeriod) {
         putIfNotNull("MessageRetentionPeriod", messageRetentionPeriod);
@@ -67,9 +62,6 @@ public class CreateQueueRequestBuilder {
     /**
      * @param visibilityTimeout the visibility timeout for the queue, in seconds.
      * Valid values: An integer from 0 to 43,200 (12 hours). Default: 30.
-     * For more information about the visibility timeout,
-     * see <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html">Visibility Timeout</a>
-     * in the Amazon Simple Queue Service Developer Guide
      */
     public CreateQueueRequestBuilder withVisibilityTimeout(Long visibilityTimeout) {
         putIfNotNull("VisibilityTimeout", visibilityTimeout);

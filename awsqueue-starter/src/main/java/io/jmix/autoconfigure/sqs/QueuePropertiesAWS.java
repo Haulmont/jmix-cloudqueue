@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.autoconfigure.sqs;
 
 import com.amazonaws.regions.Regions;
+import io.jmix.sqs.api.QueueProperties;
 import io.micrometer.core.lang.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
-@ConfigurationProperties(prefix = "jmix.awsqueue")
+@ConfigurationProperties(prefix = "jmix.sqs.aws")
 @ConstructorBinding
-public class QueueProperties {
+public class QueuePropertiesAWS implements QueueProperties {
 
     protected String accessKey;
     protected String secretKey;
     protected String region;
     protected String queuePrefix;
 
-    public QueueProperties(@Nullable String accessKey,
-                           @Nullable String secretKey,
-                           @Nullable String region,
-                           @DefaultValue("") String queuePrefix) {
+    public QueuePropertiesAWS(@Nullable String accessKey,
+                              @Nullable String secretKey,
+                              @Nullable String region,
+                              @DefaultValue("") String queuePrefix) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.region = region != null ? region : Regions.DEFAULT_REGION.getName();

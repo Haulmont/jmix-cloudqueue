@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.awsqueue;
+package io.jmix.sqs.utils;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
@@ -50,8 +50,6 @@ public class QueueMessageBuilder<T> {
      * @param messageGroupId the tag that specifies that a message belongs to a specific message group
      * @param messageDeduplicationId the token used for deduplication of sent messages
      * @return spring message builder for payload that was specified with arguments for FIFO queue
-     * @see <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html">
-     * AWS fifo queue
      * </a>
      */
     public MessageBuilder<T> fifo(String messageGroupId, String messageDeduplicationId) {

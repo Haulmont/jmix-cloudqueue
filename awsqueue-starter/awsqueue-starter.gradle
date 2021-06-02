@@ -18,7 +18,6 @@ group = 'io.jmix.awsqueue'
 archivesBaseName = 'jmix-awsqueue-starter'
 
 dependencies {
-    api project(':awsqueue')
     api project(':sqs-api')
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure'

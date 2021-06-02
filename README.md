@@ -13,23 +13,47 @@ For more information see:
 Add to your project's `build.gradle` dependencies:
 
 ```groovy
+implementation 'io.jmix.awsqueue:jmix-sqs-ui-starter'
+```
+
+For AWS Queue:
+```groovy
 implementation 'io.jmix.awsqueue:jmix-awsqueue-starter'
-implementation 'io.jmix.awsqueue:jmix-awsqueue-ui-starter'
+```
+
+For Yandex Queue:
+```groovy
+implementation 'io.jmix.awsqueue:jmix-yandexqueue-starter'
 ```
 
 Specify AWS credentials and region in `application.properties`:
 ```
-jmix.awsqueue.region = eu-central-1
-jmix.awsqueue.access-key = AWS_ACCESS_KEY
-jmix.awsqueue.secret-key = AWS_SECRET_KEY
+jmix.sqs.awsqueue.region = eu-central-1
+jmix.sqs.awsqueue.access-key = AWS_ACCESS_KEY
+jmix.sqs.awsqueue.secret-key = AWS_SECRET_KEY
 ```
-By default, tag is not defined and application loads every queue from AWS and
+
+Specify Yandex credentials, region and endpoint in `application.properties`:
+```
+jmix.sqs.yandexqueue.region = ru-central1
+jmix.sqs.yandexqueue.access-key = YANDEX_ACCESS_KEY
+jmix.sqs.yandexqueue.secret-key = YANDEX_SECRET_KEY
+jmix.sqs.yandexqueue.endpoint-configuration = https://message-queue.api.cloud.yandex.net
+```
+
+By default, tag is not defined and application loads every queue and
 create queues without any tag
 
 Add AWS family queues tag to use only tagged to restrict queues in your application
 ```
-jmix.awsqueue.queue-prefix = jmixqueues
+jmix.sqs.awsqueue.queue-prefix = jmixqueues
 ```
+
+Add Yandex family queues tag to use only tagged to restrict queues in your application
+```
+jmix.sqs.yandexqueue.queue-prefix = jmixqueues
+```
+
 After this ADD-on will create and load only 'jmixqueues' tagged queues.
 
 
@@ -40,8 +64,8 @@ Specify next parameters for SQS Listener in `application.properties`:
 4. thread-pool-core-size - the number of threads to keep in the pool, even if they are idle. Use in thread pool that serves for handling messages.
 
 ```
-jmix.awsqueue.listener.long-polling-timeout = 10000
-jmix.awsqueue.listener.waiting-time-receive-request = 5
-jmix.awsqueue.listener.max-number-of-messages = 10
-jmix.awsqueue.listener.thread-pool-core-size = 5
+jmix.sqs.listener.long-polling-timeout = 10000
+jmix.sqs.listener.waiting-time-receive-request = 5
+jmix.sqs.listener.max-number-of-messages = 10
+jmix.sqs.listener.thread-pool-core-size = 5
 ```

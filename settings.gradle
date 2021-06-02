@@ -17,8 +17,8 @@
 rootProject.name = 'jmix-awsqueue'
 
 include 'sqs-api'
-include 'awsqueue'
 include 'awsqueue-starter'
+include 'yandexqueue-starter'
 include 'sqs-ui'
 include 'sqs-ui-starter'
 
