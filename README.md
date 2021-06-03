@@ -41,15 +41,15 @@ jmix.simplequeue.yandex.secret-key = YANDEX_SECRET_KEY
 jmix.simplequeue.yandex.endpoint-configuration = https://message-queue.api.cloud.yandex.net
 ```
 
-By default, tag is not defined and application loads every queue and
-create queues without any tag
+By default, prefix is not defined and application loads every queue and
+create queues without any prefix
 
-Add Provider family queues tag to use only tagged to restrict queues in your application
+Add Provider family queues prefix to use only queues with the prefix to restrict queues in your application
 ```
-jmix.simplequeue.queue.prefix = jmixqueues
+jmix.simplequeue.queue-prefix = jmixqueues
 ```
 
-After this ADD-on will create and load only 'jmixqueues' tagged queues.
+After this ADD-on will create and load only 'jmixqueues' queues with the prefix.
 
 
 Specify next parameters for Simple Queue Listener in `application.properties`:

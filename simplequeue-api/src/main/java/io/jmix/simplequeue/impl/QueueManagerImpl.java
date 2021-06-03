@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.simplequeue.api.MessageQueueHandler;
 import io.jmix.simplequeue.api.QueueManager;
-import io.jmix.simplequeue.configuration.ListenerProperties;
 import io.jmix.simplequeue.configuration.QueueProperties;
 import io.jmix.simplequeue.entity.QueueAttributes;
 import io.jmix.simplequeue.entity.QueueInfo;
@@ -61,28 +60,28 @@ public class QueueManagerImpl implements QueueManager {
     @Autowired
     protected QueueStatusCache queueStatusCache;
     @Autowired
-    protected QueueProperties queueProperties;
-    @Autowired
     protected GeneratedIdEntityInitializer generatedIdEntityInitializer;
     @Autowired
     protected DataManager dataManager;
 
     protected ObjectMapper mapper;
 
-    private final Map<String, List<MessageQueueHandler>> queuesHandlers = new ConcurrentHashMap<>();
+    private final QueueProperties queueProperties;
+    private final Map<String, List<MessageQueueHandler>> queueHandlers = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executorService;
     private final ReceiveMessageRequest receiveRequest;
 
-    public QueueManagerImpl(ListenerProperties listenerProperties) {
+    public QueueManagerImpl(QueueProperties queueProperties) {
+        this.queueProperties = queueProperties;
         mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        executorService = Executors.newScheduledThreadPool(listenerProperties.getThreadPoolCoreSize());
+        executorService = Executors.newScheduledThreadPool(queueProperties.getListener().getThreadPoolCoreSize());
         executorService.scheduleAtFixedRate(this::handleMessagesFromQueues,
-                listenerProperties.getLongPollingTimeout(),
-                listenerProperties.getLongPollingTimeout(),
+                queueProperties.getListener().getLongPollingTimeout(),
+                queueProperties.getListener().getLongPollingTimeout(),
                 TimeUnit.MILLISECONDS);
         receiveRequest = new ReceiveMessageRequest()
-                .withWaitTimeSeconds(listenerProperties.getWaitingTimeReceiveRequest())
-                .withMaxNumberOfMessages(listenerProperties.getMaxNumberOfMessages());
+                .withWaitTimeSeconds(queueProperties.getListener().getWaitingTimeReceiveRequest())
+                .withMaxNumberOfMessages(queueProperties.getListener().getMaxNumberOfMessages());
     }
 
     @EventListener
@@ -135,14 +134,14 @@ public class QueueManagerImpl implements QueueManager {
     public void deleteQueue(String queueUrl) {
         amazonSQSAsyncClient.deleteQueueAsync(queueUrl);
         queueStatusCache.setDeleting(queueUrl);
-        queuesHandlers.remove(queueUrl);
+        queueHandlers.remove(queueUrl);
     }
 
     @Override
     public void subscribe(String queueName, MessageQueueHandler lambdaHandler) {
         String queueUrl = getQueueUrlByName(queueName);
-        queuesHandlers.computeIfAbsent(queueUrl, queue -> new ArrayList<MessageQueueHandler>());
-        queuesHandlers.get(queueUrl).add(lambdaHandler);
+        queueHandlers.computeIfAbsent(queueUrl, queue -> new ArrayList<>());
+        queueHandlers.get(queueUrl).add(lambdaHandler);
     }
 
     @Override
@@ -162,8 +161,8 @@ public class QueueManagerImpl implements QueueManager {
 
     private void handleMessagesFromQueues() {
         try {
-            if (!queuesHandlers.isEmpty())
-                queuesHandlers.forEach((queue, handlers) -> {
+            if (!queueHandlers.isEmpty())
+                queueHandlers.forEach((queue, handlers) -> {
                     if (!handlers.isEmpty()) {
                         receiveRequest.setQueueUrl(queue);
                         ReceiveMessageResult result = amazonSQSAsyncClient.receiveMessage(receiveRequest);
