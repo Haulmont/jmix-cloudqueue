@@ -1,4 +1,4 @@
-# Jmix AWS Queue
+# Jmix Cloud Queue
 
 This repository contains AWS Queue project of the [Jmix](https://jmix.io) framework.
 
@@ -13,32 +13,32 @@ For more information see:
 Add to your project's `build.gradle` dependencies:
 
 ```groovy
-implementation 'io.jmix.simplequeueui:jmix-simplequeue-ui-starter'
+implementation 'io.jmix.cloudqueueui:jmix-cloudqueue-ui-starter'
 ```
 
 For AWS Queue:
 ```groovy
-implementation 'io.jmix.simplequeueui:jmix-simplequeue-aws-starter'
+implementation 'io.jmix.cloudqueueui:jmix-cloudqueue-aws-starter'
 ```
 
 For Yandex Queue:
 ```groovy
-implementation 'io.jmix.simplequeueui:jmix-simplequeue-yandex-starter'
+implementation 'io.jmix.cloudqueueui:jmix-cloudqueue-yandex-starter'
 ```
 
 Specify AWS credentials and region in `application.properties`:
 ```
-jmix.simplequeue.aws.region = eu-central-1
-jmix.simplequeue.aws.access-key = AWS_ACCESS_KEY
-jmix.simplequeue.aws.secret-key = AWS_SECRET_KEY
+jmix.cloudqueue.aws.region = eu-central-1
+jmix.cloudqueue.aws.access-key = AWS_ACCESS_KEY
+jmix.cloudqueue.aws.secret-key = AWS_SECRET_KEY
 ```
 
 Specify Yandex credentials, region and endpoint in `application.properties`:
 ```
-jmix.simplequeue.yandex.region = ru-central1
-jmix.simplequeue.yandex.access-key = YANDEX_ACCESS_KEY
-jmix.simplequeue.yandex.secret-key = YANDEX_SECRET_KEY
-jmix.simplequeue.yandex.endpoint-configuration = https://message-queue.api.cloud.yandex.net
+jmix.cloudqueue.yandex.region = ru-central1
+jmix.cloudqueue.yandex.access-key = YANDEX_ACCESS_KEY
+jmix.cloudqueue.yandex.secret-key = YANDEX_SECRET_KEY
+jmix.cloudqueue.yandex.endpoint-configuration = https://message-queue.api.cloud.yandex.net
 ```
 
 By default, prefix is not defined and application loads every queue and
@@ -46,7 +46,7 @@ create queues without any prefix
 
 Add Provider family queues prefix to use only queues with the prefix to restrict queues in your application
 ```
-jmix.simplequeue.queue-prefix = jmixqueues
+jmix.cloudqueue.queue-prefix = jmixqueues
 ```
 
 After this ADD-on will create and load only 'jmixqueues' queues with the prefix.
@@ -59,8 +59,8 @@ Specify next parameters for Simple Queue Listener in `application.properties`:
 4. thread-pool-core-size - the number of threads to keep in the pool, even if they are idle. Use in thread pool that serves for handling messages.
 
 ```
-jmix.simplequeue.listener.long-polling-timeout = 10000
-jmix.simplequeue.listener.waiting-time-receive-request = 5
-jmix.simplequeue.listener.max-number-of-messages = 10
-jmix.simplequeue.listener.thread-pool-core-size = 5
+jmix.cloudqueue.listener.long-polling-timeout = 10000
+jmix.cloudqueue.listener.waiting-time-receive-request = 5
+jmix.cloudqueue.listener.max-number-of-messages = 10
+jmix.cloudqueue.listener.thread-pool-core-size = 5
 ```

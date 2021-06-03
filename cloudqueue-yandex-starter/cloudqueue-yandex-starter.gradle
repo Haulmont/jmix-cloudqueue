@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-rootProject.name = 'jmix-cloudqueue'
+group = 'io.jmix.cloudqueue'
+archivesBaseName = 'jmix-cloudqueue-yandex-starter'
 
-include 'cloudqueue-api'
-include 'cloudqueue-aws-starter'
-include 'cloudqueue-yandex-starter'
-include 'cloudqueue-ui'
-include 'cloudqueue-ui-starter'
+dependencies {
+    api project(':cloudqueue-api')
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-
