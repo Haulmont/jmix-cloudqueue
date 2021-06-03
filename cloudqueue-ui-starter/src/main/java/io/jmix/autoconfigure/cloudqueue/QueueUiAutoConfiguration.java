@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-rootProject.name = 'jmix-cloudqueue'
+package io.jmix.autoconfigure.cloudqueue;
 
-include 'cloudqueue-api'
-include 'cloudqueue-aws-starter'
-include 'cloudqueue-yandex-starter'
-include 'cloudqueue-ui'
-include 'cloudqueue-ui-starter'
+import io.jmix.cloudqueueui.QueueUiConfiguration;
+import io.jmix.core.CoreConfiguration;
+import io.jmix.cloudqueue.CloudQueueAPIConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-rootProject.children.each { p1 ->
-    p1.buildFileName = "${p1.name}.gradle"
+@Configuration
+@Import({CoreConfiguration.class, QueueUiConfiguration.class, CloudQueueAPIConfiguration.class})
+public class QueueUiAutoConfiguration {
+
 }
-
