@@ -46,6 +46,10 @@ public class QueueStatusCache {
         return creatingQueues.values();
     }
 
+    public Map<String, QueueInfo> getCreatingQueuesMap() {
+        return creatingQueues;
+    }
+
     public void setDeleting(String queueUrl) {
         deletedQueueUrls.add(queueUrl);
     }

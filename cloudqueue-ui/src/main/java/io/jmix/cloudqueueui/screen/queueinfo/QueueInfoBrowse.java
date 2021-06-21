@@ -74,7 +74,11 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
     public void onQueueStatesTableRemove(Action.ActionPerformedEvent event) {
         QueueInfo toDelete = queueInfoDataGrid.getSingleSelected();
         if (!Objects.isNull(toDelete)) {
-            queueManager.deleteQueue(toDelete.getUrl());
+            String url = toDelete.getUrl();
+            if (Objects.isNull(url)) {
+                url = queueStatusCache.getCreatingQueuesMap().get(toDelete.getName()).getUrl();
+            }
+            queueManager.deleteQueue(url);
             queueInfoDc.getMutableItems().remove(toDelete);
         }
     }
