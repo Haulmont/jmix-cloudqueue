@@ -16,6 +16,7 @@
 
 package io.jmix.cloudqueue.impl;
 
+import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -126,8 +127,7 @@ public class QueueManagerImpl implements QueueManager {
     @Override
     public void createQueue(CreateQueueRequest createQueueRequest) {
         setPhysicalNameIfNotValid(createQueueRequest);
-        amazonSQSAsyncClient.createQueueAsync(createQueueRequest);
-        queueStatusCache.setCreating(queueInfoFromRequest(createQueueRequest));
+        amazonSQSAsyncClient.createQueueAsync(createQueueRequest, buildAndGetCreateAsyncHandler(createQueueRequest));
     }
 
     @Override
@@ -157,6 +157,20 @@ public class QueueManagerImpl implements QueueManager {
                 .findFirst();
         if (optionalQueueInfo.isPresent()) queueUrl = optionalQueueInfo.get().getUrl();
         return queueUrl;
+    }
+
+    private AsyncHandler<CreateQueueRequest, CreateQueueResult> buildAndGetCreateAsyncHandler(CreateQueueRequest createQueueRequest) {
+        return new AsyncHandler<CreateQueueRequest, CreateQueueResult>() {
+            @Override
+            public void onError(Exception exception) {
+                log.error("In during creating occurred exception: {}", exception.getMessage());
+            }
+
+            @Override
+            public void onSuccess(CreateQueueRequest request, CreateQueueResult createQueueResult) {
+                queueStatusCache.setCreating(queueInfoFromRequest(createQueueRequest, createQueueResult));
+            }
+        };
     }
 
     private void handleMessagesFromQueues() {
@@ -209,7 +223,7 @@ public class QueueManagerImpl implements QueueManager {
         createQueueRequest.setQueueName(QueueInfoUtils.generatePhysicalName(name, type, prefix));
     }
 
-    protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest) {
+    protected QueueInfo queueInfoFromRequest(CreateQueueRequest createQueueRequest, CreateQueueResult createQueueResult) {
         Map<String, String> mapAttrs = createQueueRequest.getAttributes();
         QueueAttributes queueAttributes = mapper.convertValue(mapAttrs, QueueAttributes.class);
         generatedIdEntityInitializer.initEntity(queueAttributes);
