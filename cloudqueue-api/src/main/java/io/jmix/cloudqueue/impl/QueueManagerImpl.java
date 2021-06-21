@@ -149,6 +149,16 @@ public class QueueManagerImpl implements QueueManager {
         queueMessagingTemplate.send(queueName, message);
     }
 
+    private String getQueueUrlByName(String name) {
+        String queueUrl = name;
+        Optional<QueueInfo> optionalQueueInfo = loadFromApi().values()
+                .stream()
+                .filter(queueInfo -> queueInfo.getName().equals(name))
+                .findFirst();
+        if (optionalQueueInfo.isPresent()) queueUrl = optionalQueueInfo.get().getUrl();
+        return queueUrl;
+    }
+
     private AsyncHandler<CreateQueueRequest, CreateQueueResult> buildAndGetCreateAsyncHandler(CreateQueueRequest createQueueRequest) {
         return new AsyncHandler<CreateQueueRequest, CreateQueueResult>() {
             @Override
@@ -161,16 +171,6 @@ public class QueueManagerImpl implements QueueManager {
                 queueStatusCache.setCreating(queueInfoFromRequest(createQueueRequest, createQueueResult));
             }
         };
-    }
-
-    private String getQueueUrlByName(String name) {
-        String queueUrl = name;
-        Optional<QueueInfo> optionalQueueInfo = loadFromApi().values()
-                .stream()
-                .filter(queueInfo -> queueInfo.getName().equals(name))
-                .findFirst();
-        if (optionalQueueInfo.isPresent()) queueUrl = optionalQueueInfo.get().getUrl();
-        return queueUrl;
     }
 
     private void handleMessagesFromQueues() {
@@ -232,7 +232,6 @@ public class QueueManagerImpl implements QueueManager {
         queueInfo.setName(createQueueRequest.getQueueName());
         queueInfo.setType(QueueInfoUtils.getTypeByName(createQueueRequest.getQueueName()));
         queueInfo.setQueueAttributes(queueAttributes);
-        queueInfo.setUrl(createQueueResult.getQueueUrl());
         queueInfo.setStatus(QueueStatus.CREATING);
         return queueInfo;
     }
