@@ -11,10 +11,10 @@ public class QueueProperties {
     protected Listener listener;
 
     public QueueProperties(
-            Listener listener,
+            @DefaultValue Listener listener,
             @DefaultValue("") String queuePrefix) {
         this.queuePrefix = queuePrefix;
-        this.listener = listener == null ? new Listener() : listener;
+        this.listener = listener;
     }
 
     public String getQueuePrefix() {
@@ -34,22 +34,11 @@ public class QueueProperties {
     }
 
     public static class Listener {
-        private static final int THREAD_POOL_CORE_SIZE_DEFAULT = 5;
-        private static final int LONG_POLLING_TIMEOUT_DEFAULT = 10000;
-        private static final int WAITING_TIME_RECEIVE_REQUEST_DEFAULT = 5;
-        private static final int MAX_NUMBER_OF_MESSAGES_DEFAULT = 10;
 
         protected int threadPoolCoreSize;
         protected int longPollingTimeout;
         protected int waitingTimeReceiveRequest;
         protected int maxNumberOfMessages;
-
-        public Listener() {
-            this.threadPoolCoreSize = THREAD_POOL_CORE_SIZE_DEFAULT;
-            this.longPollingTimeout = LONG_POLLING_TIMEOUT_DEFAULT;
-            this.waitingTimeReceiveRequest = WAITING_TIME_RECEIVE_REQUEST_DEFAULT;
-            this.maxNumberOfMessages = MAX_NUMBER_OF_MESSAGES_DEFAULT;
-        }
 
         public Listener(@DefaultValue("5") int threadPoolCoreSize,
                         @DefaultValue("10000") int longPollingTimeout,
