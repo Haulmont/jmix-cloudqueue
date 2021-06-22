@@ -3,7 +3,6 @@ package io.jmix.cloudqueue.configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.lang.Nullable;
 
 @ConfigurationProperties(prefix = "jmix.cloudqueue")
 @ConstructorBinding
@@ -12,7 +11,7 @@ public class QueueProperties {
     protected Listener listener;
 
     public QueueProperties(
-            @Nullable Listener listener,
+            @DefaultValue Listener listener,
             @DefaultValue("") String queuePrefix) {
         this.queuePrefix = queuePrefix;
         this.listener = listener;
@@ -35,6 +34,7 @@ public class QueueProperties {
     }
 
     public static class Listener {
+
         protected int threadPoolCoreSize;
         protected int longPollingTimeout;
         protected int waitingTimeReceiveRequest;
