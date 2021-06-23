@@ -231,6 +231,7 @@ public class QueueManagerImpl implements QueueManager {
         QueueInfo queueInfo = dataManager.create(QueueInfo.class);
         queueInfo.setName(createQueueRequest.getQueueName());
         queueInfo.setType(QueueInfoUtils.getTypeByName(createQueueRequest.getQueueName()));
+        queueInfo.setUrl(createQueueResult.getQueueUrl());
         queueInfo.setQueueAttributes(queueAttributes);
         queueInfo.setStatus(QueueStatus.CREATING);
         return queueInfo;
