@@ -77,10 +77,10 @@ public class QueueInfoBrowse extends StandardLookup<QueueInfo> {
             String url = toDelete.getUrl();
             if (Objects.isNull(url)) {
                 url = queueStatusCache.getCreatingQueuesMap().get(toDelete.getName()).getUrl();
-                queueStatusCache.getCreatingQueuesMap().remove(toDelete.getName());
             }
             queueManager.deleteQueue(url);
             queueInfoDc.getMutableItems().remove(toDelete);
+            queueStatusCache.getCreatingQueuesMap().remove(toDelete.getName());
         }
     }
 
