@@ -17,6 +17,6 @@
 
 <menu-config xmlns="http://jmix.io/schema/ui/menu">
     <menu id="queues" caption="msg://io.jmix.cloudqueueui/menu.queues" insertAfter="administration">
-        <item id="cloudqueue_QueueInfo.browse" caption="msg://io.jmix.cloudqueueui/menu.queueInfo"/>
+        <item screen="cloudqueue_QueueInfo.browse" caption="msg://io.jmix.cloudqueueui/menu.queueInfo"/>
     </menu>
 </menu-config>
