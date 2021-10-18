@@ -50,7 +50,6 @@ public class QueueMessageBuilder<T> {
      * @param messageGroupId the tag that specifies that a message belongs to a specific message group
      * @param messageDeduplicationId the token used for deduplication of sent messages
      * @return spring message builder for payload that was specified with arguments for FIFO queue
-     * </a>
      */
     public MessageBuilder<T> fifo(String messageGroupId, String messageDeduplicationId) {
         messageBuilder.setHeader(MESSAGE_GROUP_ID_KEY, messageGroupId);
